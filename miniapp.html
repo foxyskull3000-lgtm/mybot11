@@ -22,20 +22,69 @@
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; margin: 0; }
+
   body {
     font-family: var(--font-ui);
     color: var(--text);
-    background:
-      radial-gradient(700px 500px at 110% -10%, rgba(80, 200, 220, .30), transparent 60%),
-      radial-gradient(600px 450px at -10% 110%, rgba(60, 130, 220, .25), transparent 60%),
-      linear-gradient(165deg, #0F1620 0%, #1B2A3D 50%, #14202E 100%);
-    background-attachment: fixed;
+    background: #0F1620;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
     -webkit-user-select: none; user-select: none;
+    position: relative;
+    overflow-x: hidden;
   }
+
+  /* Анимированный «переливающийся» фон из трёх свечений */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    z-index: -1;
+    background:
+      radial-gradient(closest-side, rgba(80, 200, 220, .55), transparent 70%) 20% 30% / 70% 70% no-repeat,
+      radial-gradient(closest-side, rgba(60, 130, 220, .50), transparent 70%) 80% 20% / 70% 70% no-repeat,
+      radial-gradient(closest-side, rgba(255, 140, 0, .28), transparent 70%) 50% 90% / 80% 80% no-repeat;
+    filter: blur(30px);
+    animation: aurora 18s ease-in-out infinite;
+    will-change: background-position, transform;
+  }
+
+  /* Базовый тёмный слой поверх свечений */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(165deg, #0F1620 0%, #1B2A3D 50%, #14202E 100%);
+    opacity: .55;
+    pointer-events: none;
+  }
+
+  @keyframes aurora {
+    0% {
+      background-position: 20% 30%, 80% 20%, 50% 90%;
+      transform: scale(1) rotate(0deg);
+    }
+    25% {
+      background-position: 70% 20%, 20% 70%, 40% 50%;
+      transform: scale(1.06) rotate(4deg);
+    }
+    50% {
+      background-position: 80% 80%, 30% 30%, 70% 20%;
+      transform: scale(1.10) rotate(0deg);
+    }
+    75% {
+      background-position: 30% 70%, 70% 80%, 20% 60%;
+      transform: scale(1.05) rotate(-4deg);
+    }
+    100% {
+      background-position: 20% 30%, 80% 20%, 50% 90%;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
   .app { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; }
 
   .glass {
