@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>NookenVPN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --orange: #ff9a1a;
+    --orange-2: #ffb347;
+    --glass: rgba(255, 255, 255, .16);
+    --glass-strong: rgba(255, 255, 255, .24);
+    --stroke: rgba(255, 255, 255, .30);
+    --text: #ffffff;
+    --muted: rgba(255, 255, 255, .86);
+    --font-num: "Montserrat", -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-ui: "Nunito", -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--font-ui);
+    color: var(--text);
+    background:
+      radial-gradient(900px 600px at 105% -10%, rgba(120, 190, 255, .55), transparent 60%),
+      linear-gradient(160deg, #1f86f2 0%, #0d68e2 45%, #0958c9 100%);
+    background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    -webkit-user-select: none; user-select: none;
+  }
+  .app { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; }
+
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--stroke);
+    border-radius: 26px;
+    box-shadow: 0 10px 30px rgba(4, 40, 110, .22), inset 0 1px 0 rgba(255, 255, 255, .25);
+    -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  }
+
+  /* шапка */
+  .head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 14px 18px; min-height: 74px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-num); font-weight: 700; font-size: 21px; letter-spacing: .2px; }
+  .brand .vpn { color: var(--orange); }
+  .brand svg { width: 30px; height: 34px; flex: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .25)); }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; background: rgba(5, 40, 110, .28); border: 1px solid var(--stroke); font-weight: 800; font-size: 13.5px; white-space: nowrap; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #2ee59d; box-shadow: 0 0 10px #2ee59d; }
+
+  /* плитки */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .tile { min-height: 138px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; }
+  .tile.light { background: var(--glass-strong); }
+  .label { font-weight: 800; font-size: 14px; color: var(--muted); }
+  .big { font-family: var(--font-num); font-weight: 300; font-size: 54px; line-height: 1.05; letter-spacing: -1px; }
+  .big small { font-family: var(--font-ui); font-weight: 800; font-size: 15px; letter-spacing: 0; margin-left: 8px; color: var(--muted); }
+  .plus { font-family: var(--font-num); font-weight: 300; font-size: 36px; line-height: 1; }
+  .tile .cta { font-weight: 800; font-size: 16px; }
+
+  /* кнопки */
+  button { font-family: var(--font-ui); color: inherit; border: 0; cursor: pointer; transition: transform .12s ease, filter .12s ease; }
+  button:active { transform: scale(.97); filter: brightness(1.05); }
+  .tile.btn { width: 100%; }
+  .row { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
+  .pbtn, .sbtn { height: 56px; border-radius: 999px; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .pbtn { background: linear-gradient(135deg, var(--orange), var(--orange-2)); color: #1d1300; border: 1px solid rgba(255, 255, 255, .5); box-shadow: 0 10px 26px rgba(255, 140, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .5); }
+  .sbtn { background: var(--glass); border: 1px solid var(--stroke); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 10px 26px rgba(4, 40, 110, .2); }
+  .wide { width: 100%; }
+  .pbtn svg { width: 20px; height: 20px; }
+  .foot { text-align: center; font-size: 12.5px; font-weight: 600; color: rgba(255, 255, 255, .75); margin-top: 2px; }
+</style>
+</head>
+<body>
+<main class="app">
+
+  <header class="glass head">
+    <div class="brand">
+      <svg viewBox="0 0 32 36" aria-hidden="true">
+        <path d="M16 1.5 30 6.4v11.2c0 8.6-6.4 14.6-14 16.9C8.4 32.2 2 26.2 2 17.6V6.4L16 1.5Z" fill="#fff"/>
+        <path d="M11 24.5V11.5h2.6l5 8.1v-8.1H21v13h-2.6l-5-8.1v8.1H11Z" fill="#ff8a00"/>
+      </svg>
+      <span>Nooken<span class="vpn">VPN</span></span>
+    </div>
+    <div class="pill"><span class="dot"></span><span id="uid">id: —</span></div>
+  </header>
+
+  <section class="grid">
+    <div class="glass tile light">
+      <div class="label">Баланс</div>
+      <div class="big"><span id="balance">—</span> ₽</div>
+    </div>
+    <div class="glass tile">
+      <div class="label">Устройства</div>
+      <div class="big"><span id="devices">—</span><small id="devmax">из 5</small></div>
+    </div>
+    <button class="glass tile light btn" id="btn-topup" type="button">
+      <div class="plus">+</div>
+      <div class="cta">Пополнить</div>
+    </button>
+    <div class="glass tile">
+      <div class="label">Хватит на</div>
+      <div class="big"><span id="days">—</span><small id="dayword">дней</small></div>
+    </div>
+  </section>
+
+  <section class="row">
+    <button class="pbtn" id="btn-setup" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+      Настроить VPN
+    </button>
+    <button class="sbtn" id="btn-support" type="button">Поддержка</button>
+  </section>
+
+  <button class="sbtn wide" id="btn-invite" type="button">🤝 Пригласить и заработать</button>
+
+  <div class="foot">@NookenVPN_bot</div>
+</main>
+
+<script>
+  // ====== НАСТРОЙКИ ======
+  const BOT_USERNAME = "NookenVPN_bot";   // без @
+  const SUPPORT_USERNAME = "Lov1rus";     // без @
+  // =======================
+
+  const tg = window.Telegram && window.Telegram.WebApp;
+  try {
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.setHeaderColor) tg.setHeaderColor("#0d68e2");
+      if (tg.setBackgroundColor) tg.setBackgroundColor("#0d68e2");
+    }
+  } catch (e) {}
+
+  // Цифры приходят из бота в ссылке: ?b=баланс&d=устройств&m=максимум&t=хватит дней&u=id
+  const q = new URLSearchParams(location.search);
+  const num = (key) => {
+    const v = parseInt(q.get(key), 10);
+    return Number.isFinite(v) ? v : null;
+  };
+  const set = (id, text) => { document.getElementById(id).textContent = text; };
+
+  // «день / дня / дней»
+  const plural = (n, one, few, many) => {
+    const a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return many;
+    if (b > 1 && b < 5) return few;
+    if (b === 1) return one;
+    return many;
+  };
+
+  const balance = num("b"), devices = num("d"), max = num("m"), days = num("t");
+  let uid = num("u");
+  if (!uid && tg && tg.initDataUnsafe && tg.initDataUnsafe.user) uid = tg.initDataUnsafe.user.id;
+
+  if (balance !== null) set("balance", balance);
+  if (devices !== null) set("devices", devices);
+  if (max !== null) set("devmax", "из " + max);
+  if (days !== null) {
+    set("days", days > 999 ? "999+" : days);
+    set("dayword", plural(days, "день", "дня", "дней"));
+  }
+  if (uid) set("uid", "id: " + uid);
+
+  // Кнопки открывают бота: он по ссылке ?start=... показывает нужный раздел
+  const openTg = (url) => {
+    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light"); } catch (e) {}
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, "_blank");
+  };
+  const botLink = (action) => "https://t.me/" + BOT_USERNAME + "?start=" + action;
+
+  document.getElementById("btn-topup").onclick = () => openTg(botLink("app_buy"));
+  document.getElementById("btn-setup").onclick = () => openTg(botLink("app_setup"));
+  document.getElementById("btn-invite").onclick = () => openTg(botLink("app_ref"));
+  document.getElementById("btn-support").onclick = () => openTg("https://t.me/" + SUPPORT_USERNAME);
+</script>
+</body>
+</html>
