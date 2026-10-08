@@ -10,13 +10,14 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root {
-    --orange: #ff9a1a;
-    --orange-2: #ffb347;
-    --glass: rgba(255, 255, 255, .16);
-    --glass-strong: rgba(255, 255, 255, .24);
-    --stroke: rgba(255, 255, 255, .30);
-    --text: #ffffff;
-    --muted: rgba(255, 255, 255, .86);
+    --bg: #BDAF99;
+    --card: #CFC3B0;
+    --card-2: #C6B9A4;
+    --stroke: #8A7D66;
+    --text: #2E2A24;
+    --muted: #5C5449;
+    --orange: #FF8C00;
+    --orange-2: #FFB347;
     --font-num: "Montserrat", -apple-system, "Segoe UI", Roboto, sans-serif;
     --font-ui: "Nunito", -apple-system, "Segoe UI", Roboto, sans-serif;
   }
@@ -25,10 +26,7 @@
   body {
     font-family: var(--font-ui);
     color: var(--text);
-    background:
-      radial-gradient(900px 600px at 105% -10%, rgba(120, 190, 255, .55), transparent 60%),
-      linear-gradient(160deg, #1f86f2 0%, #0d68e2 45%, #0958c9 100%);
-    background-attachment: fixed;
+    background: var(--bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -38,30 +36,29 @@
   .app { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; }
 
   .glass {
-    background: var(--glass);
+    background: var(--card);
     border: 1px solid var(--stroke);
     border-radius: 26px;
-    box-shadow: 0 10px 30px rgba(4, 40, 110, .22), inset 0 1px 0 rgba(255, 255, 255, .25);
-    -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+    box-shadow: 0 6px 18px rgba(90, 78, 55, .18), inset 0 1px 0 rgba(255, 255, 255, .3);
   }
 
   /* шапка */
-  .head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 14px 18px; min-height: 74px; }
-  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-num); font-weight: 700; font-size: 21px; letter-spacing: .2px; }
+  .head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 14px 18px; min-height: 74px; background: var(--text); border-color: #1F1C17; }
+  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-num); font-weight: 700; font-size: 21px; letter-spacing: .2px; color: #FFFFFF; }
   .brand .vpn { color: var(--orange); }
   .brand svg { width: 30px; height: 34px; flex: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .25)); }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; background: rgba(5, 40, 110, .28); border: 1px solid var(--stroke); font-weight: 800; font-size: 13.5px; white-space: nowrap; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .25); font-weight: 800; font-size: 13.5px; color: #FFFFFF; white-space: nowrap; }
   .dot { width: 11px; height: 11px; border-radius: 50%; background: #2ee59d; box-shadow: 0 0 10px #2ee59d; }
 
   /* плитки */
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .tile { min-height: 138px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; }
-  .tile.light { background: var(--glass-strong); }
+  .tile.light { background: var(--card-2); }
   .label { font-weight: 800; font-size: 14px; color: var(--muted); }
-  .big { font-family: var(--font-num); font-weight: 300; font-size: 54px; line-height: 1.05; letter-spacing: -1px; }
+  .big { font-family: var(--font-num); font-weight: 300; font-size: 54px; line-height: 1.05; letter-spacing: -1px; color: var(--text); }
   .big small { font-family: var(--font-ui); font-weight: 800; font-size: 15px; letter-spacing: 0; margin-left: 8px; color: var(--muted); }
-  .plus { font-family: var(--font-num); font-weight: 300; font-size: 36px; line-height: 1; }
-  .tile .cta { font-weight: 800; font-size: 16px; }
+  .plus { font-family: var(--font-num); font-weight: 300; font-size: 36px; line-height: 1; color: var(--orange); }
+  .tile .cta { font-weight: 800; font-size: 16px; color: var(--text); }
 
   /* кнопки */
   button { font-family: var(--font-ui); color: inherit; border: 0; cursor: pointer; transition: transform .12s ease, filter .12s ease; }
@@ -69,11 +66,11 @@
   .tile.btn { width: 100%; }
   .row { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
   .pbtn, .sbtn { height: 56px; border-radius: 999px; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-  .pbtn { background: linear-gradient(135deg, var(--orange), var(--orange-2)); color: #1d1300; border: 1px solid rgba(255, 255, 255, .5); box-shadow: 0 10px 26px rgba(255, 140, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .5); }
-  .sbtn { background: var(--glass); border: 1px solid var(--stroke); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 10px 26px rgba(4, 40, 110, .2); }
+  .pbtn { background: linear-gradient(135deg, var(--orange), var(--orange-2)); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, .35); box-shadow: 0 8px 20px rgba(255, 140, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .4); }
+  .sbtn { background: var(--card); border: 1px solid var(--stroke); color: var(--text); box-shadow: 0 4px 14px rgba(90, 78, 55, .15); }
   .wide { width: 100%; }
   .pbtn svg { width: 20px; height: 20px; }
-  .foot { text-align: center; font-size: 12.5px; font-weight: 600; color: rgba(255, 255, 255, .75); margin-top: 2px; }
+  .foot { text-align: center; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -133,8 +130,8 @@
     if (tg) {
       tg.ready();
       tg.expand();
-      if (tg.setHeaderColor) tg.setHeaderColor("#0d68e2");
-      if (tg.setBackgroundColor) tg.setBackgroundColor("#0d68e2");
+      if (tg.setHeaderColor) tg.setHeaderColor("#BDAF99");
+      if (tg.setBackgroundColor) tg.setBackgroundColor("#BDAF99");
     }
   } catch (e) {}
 
