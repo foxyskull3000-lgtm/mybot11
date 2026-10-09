@@ -6,212 +6,207 @@
 <title>NookenVPN</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  :root {
-    --orange: #ff9a1a;
-    --orange-2: #ffb347;
-    --glass: rgba(255, 255, 255, .06);
-    --glass-strong: rgba(255, 255, 255, .10);
-    --stroke: rgba(255, 255, 255, .14);
-    --text: #ffffff;
-    --muted: rgba(255, 255, 255, .70);
-    --font-num: "Montserrat", -apple-system, "Segoe UI", Roboto, sans-serif;
-    --font-ui: "Nunito", -apple-system, "Segoe UI", Roboto, sans-serif;
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; margin: 0; }
-
-  body {
-    font-family: var(--font-ui);
-    color: var(--text);
-    background: #0F1620;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
-    -webkit-user-select: none; user-select: none;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* Слой с диагональной полосой света — двигается из левого-нижнего в правый-верхний */
-  .bg {
-    position: fixed;
-    inset: -50%;
-    z-index: -2;
-    background: linear-gradient(
-      135deg,
-      transparent 0%,
-      transparent 30%,
-      rgba(80, 200, 220, .35) 42%,
-      rgba(120, 220, 240, .55) 48%,
-      rgba(60, 130, 220, .40) 55%,
-      transparent 68%,
-      transparent 100%
-    );
-    background-size: 200% 200%;
-    animation: diagonalFlow 10s ease-in-out infinite;
-    will-change: background-position;
-  }
-
-  /* Тёмный слой поверх — чтобы свет был мягким, а не резкой полосой */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background:
-      radial-gradient(ellipse at 100% 0%, rgba(80, 200, 220, .18), transparent 55%),
-      radial-gradient(ellipse at 0% 100%, rgba(60, 130, 220, .15), transparent 55%),
-      linear-gradient(165deg, rgba(15, 22, 32, .75) 0%, rgba(27, 42, 61, .55) 50%, rgba(20, 32, 46, .75) 100%);
-    pointer-events: none;
-  }
-
-  @keyframes diagonalFlow {
-    0%   { background-position: 0% 100%; }   /* луч в левом-нижнем */
-    50%  { background-position: 100% 0%; }   /* луч в правом-верхнем */
-    100% { background-position: 0% 100%; }   /* обратно */
-  }
-
-  .app { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 1; }
-
-  .glass {
-    background: var(--glass);
-    border: 1px solid var(--stroke);
-    border-radius: 26px;
-    box-shadow: 0 10px 30px rgba(0, 15, 35, .35), inset 0 1px 0 rgba(255, 255, 255, .10);
-    -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
-  }
-
-  .head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 14px 18px; min-height: 74px; background: rgba(10, 16, 23, .85); }
-  .brand { display: flex; align-items: center; gap: 12px; font-family: var(--font-num); font-weight: 700; font-size: 21px; letter-spacing: .2px; }
-  .brand .vpn { color: var(--orange); }
-  .brand svg { width: 30px; height: 34px; flex: none; filter: drop-shadow(0 2px 6px rgba(255, 140, 0, .35)); }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; background: rgba(80, 200, 220, .12); border: 1px solid rgba(80, 200, 220, .35); font-weight: 800; font-size: 13.5px; white-space: nowrap; }
-  .dot { width: 11px; height: 11px; border-radius: 50%; background: #2ee59d; box-shadow: 0 0 12px #2ee59d; }
-
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .tile { min-height: 138px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; }
-  .tile.light { background: var(--glass-strong); }
-  .label { font-weight: 800; font-size: 14px; color: var(--muted); }
-  .big { font-family: var(--font-num); font-weight: 300; font-size: 54px; line-height: 1.05; letter-spacing: -1px; }
-  .big small { font-family: var(--font-ui); font-weight: 800; font-size: 15px; letter-spacing: 0; margin-left: 8px; color: var(--muted); }
-  .plus { font-family: var(--font-num); font-weight: 300; font-size: 36px; line-height: 1; color: var(--orange); }
-  .tile .cta { font-weight: 800; font-size: 16px; }
-
-  button { font-family: var(--font-ui); color: inherit; border: 0; cursor: pointer; transition: transform .12s ease, filter .12s ease; }
-  button:active { transform: scale(.97); filter: brightness(1.05); }
-  .tile.btn { width: 100%; }
-  .row { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
-  .pbtn, .sbtn { height: 56px; border-radius: 999px; font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-  .pbtn { background: linear-gradient(135deg, var(--orange), var(--orange-2)); color: #1d1300; border: 1px solid rgba(255, 255, 255, .35); box-shadow: 0 10px 26px rgba(255, 140, 0, .40), inset 0 1px 0 rgba(255, 255, 255, .5); }
-  .sbtn { background: var(--glass); border: 1px solid var(--stroke); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 10px 26px rgba(0, 15, 35, .3); }
-  .wide { width: 100%; }
-  .pbtn svg { width: 20px; height: 20px; }
-  .foot { text-align: center; font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+:root{--orange:#ff9a1a;--orange-2:#ffb347;--glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.10);--stroke:rgba(255,255,255,.14);--muted:rgba(255,255,255,.70);--cyan:rgba(80,200,220,.35);--num:"Montserrat",-apple-system,"Segoe UI",Roboto,sans-serif;--ui:"Nunito",-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:var(--ui);color:#fff;background:#0F1620;-webkit-user-select:none;user-select:none}
+.bg{position:fixed;inset:-50%;z-index:-2;background:linear-gradient(135deg,transparent 0%,transparent 30%,rgba(80,200,220,.35) 42%,rgba(120,220,240,.55) 48%,rgba(60,130,220,.40) 55%,transparent 68%,transparent 100%);background-size:200% 200%;animation:flow 10s ease-in-out infinite}
+.overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 100% 0%,rgba(80,200,220,.18),transparent 55%),radial-gradient(ellipse at 0% 100%,rgba(60,130,220,.15),transparent 55%),linear-gradient(165deg,rgba(15,22,32,.75),rgba(27,42,61,.55) 50%,rgba(20,32,46,.75))}
+@keyframes flow{0%,100%{background-position:0% 100%}50%{background-position:100% 0%}}
+@media(prefers-reduced-motion:reduce){.bg{animation:none}}
+.app{max-width:460px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(112px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.tab{display:none;flex-direction:column;gap:14px}.tab.on{display:flex}
+.glass{background:var(--glass);border:1px solid var(--stroke);border-radius:26px;box-shadow:0 10px 30px rgba(0,15,35,.35),inset 0 1px 0 rgba(255,255,255,.10);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 14px 18px;min-height:74px;background:rgba(10,16,23,.85)}
+.brand{display:flex;align-items:center;gap:12px;font:700 21px var(--num)}.brand i{color:var(--orange);font-style:normal}
+.brand svg{width:30px;height:34px}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(80,200,220,.12);border:1px solid var(--cyan);font-weight:800;font-size:13.5px;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;background:#2ee59d;box-shadow:0 0 12px #2ee59d}
+.pill.off{background:rgba(255,120,90,.12);border-color:rgba(255,120,90,.4)}.pill.off .dot{background:#ff7a5a;box-shadow:0 0 12px #ff7a5a}
+h1{font:800 32px var(--num);margin:6px 2px 0}
+.card{padding:20px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.slogan{font:800 20px/1.25 var(--num);margin:4px 0 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.mini{padding:14px;border-radius:20px;background:var(--glass);border:1px solid var(--stroke)}
+.k{font:700 11.5px var(--num);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.v{font:700 20px var(--num);margin-top:8px}
+.sec{display:flex;align-items:center;gap:10px;font:700 12.5px var(--num);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:8px 2px 0}
+.sec:before{content:"";width:26px;height:3px;border-radius:2px;background:var(--orange)}
+button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:transform .12s,filter .12s}button:active{transform:scale(.97)}
+.btn{width:100%;height:56px;border-radius:999px;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
+.pri{background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#1d1300;border:1px solid rgba(255,255,255,.35);box-shadow:0 10px 26px rgba(255,140,0,.40),inset 0 1px 0 rgba(255,255,255,.5)}
+.out{background:transparent;border:1.5px solid rgba(255,154,26,.55);color:var(--orange-2)}
+.cry{background:rgba(80,200,220,.10);border:1.5px solid var(--cyan);color:#9fe6f2}
+.ghost{background:transparent;border:1px dashed var(--stroke);color:var(--muted);font-size:15px;height:52px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tf{position:relative;text-align:left;padding:16px;border-radius:22px;background:var(--glass);border:1.5px solid var(--stroke);min-height:128px;display:flex;flex-direction:column;gap:6px}
+.tf.sel{border-color:var(--orange);background:rgba(255,154,26,.08);box-shadow:0 0 0 1px rgba(255,154,26,.25),0 8px 24px rgba(255,140,0,.18)}
+.tf .l{font:700 12px var(--num);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tf b{font:800 32px var(--num)}.tf b i{font-size:16px;margin-left:4px;color:var(--muted);font-style:normal}
+.tf em{font-style:normal;color:var(--muted);font-size:14px}
+.tf u{text-decoration:none;align-self:flex-start;background:var(--orange);color:#1d1300;font-weight:800;font-size:13px;padding:3px 10px;border-radius:9px}
+.tf .ck{position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:50%;background:var(--orange);color:#1d1300;display:none;align-items:center;justify-content:center;font-weight:800}
+.tf.sel .ck{display:flex}
+.hint{text-align:center;font-size:12.5px;color:var(--muted);margin:2px 8px 0}
+.big{font:800 44px var(--num);margin:6px 0}.big small{font:700 17px var(--ui);color:var(--muted);margin-left:8px}
+.glow{position:relative;overflow:hidden}.glow:after{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(255,154,26,.35),transparent 70%)}
+.num{text-align:center;padding:22px 10px}.num b{display:block;font:800 40px var(--num)}.num span{color:var(--muted);font-weight:800;font-size:15px}
+.link{display:flex;align-items:center;gap:12px;padding:16px;border-radius:22px;background:var(--glass);border:1px solid var(--stroke)}
+.link span{flex:1;font:600 14px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;color:#bfe9f1}
+.cp{width:48px;height:48px;border-radius:14px;background:rgba(255,154,26,.15);border:1px solid rgba(255,154,26,.4);color:var(--orange);font-size:20px;flex:none}
+.who{display:flex;align-items:center;gap:16px;padding:18px}
+.av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#1d1300;font:800 30px var(--num);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(255,140,0,.4)}
+.who b{font:800 24px var(--num);display:block}.who span{color:var(--muted);font-size:16px}
+.rows{padding:6px 18px}.row{display:flex;align-items:center;gap:14px;padding:14px 0;font-size:17px;font-weight:600;width:100%;background:none;text-align:left}
+.row+.row{border-top:1px solid var(--stroke)}
+.ic{width:46px;height:46px;border-radius:14px;background:rgba(255,154,26,.12);border:1px solid rgba(255,154,26,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.row em{font-style:normal;color:var(--muted);font-weight:600}.row .gr{color:#6ff0b4}.row .or{color:var(--orange-2)}.row .ch{margin-left:auto;color:var(--muted)}
+.bar{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:432px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;border-radius:30px;background:rgba(10,16,23,.88);border:1px solid var(--stroke);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.bar button{background:none;border-radius:22px;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted);font:700 11.5px var(--num);letter-spacing:.1em;text-transform:uppercase}
+.bar button.on{background:rgba(255,154,26,.14);box-shadow:inset 0 0 0 1px rgba(255,154,26,.45);color:var(--orange)}
+.bar svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:rgba(10,16,23,.95);border:1px solid var(--cyan);padding:12px 18px;border-radius:14px;font-weight:800;opacity:0;pointer-events:none;transition:.25s}#toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
-  <div class="bg" aria-hidden="true"></div>
-  <div class="overlay" aria-hidden="true"></div>
+<div class="bg"></div><div class="overlay"></div>
+<main class="app">
 
-  <main class="app">
-    <header class="glass head">
-      <div class="brand">
-        <svg viewBox="0 0 32 36" aria-hidden="true">
-          <path d="M16 1.5 30 6.4v11.2c0 8.6-6.4 14.6-14 16.9C8.4 32.2 2 26.2 2 17.6V6.4L16 1.5Z" fill="#fff"/>
-          <path d="M11 24.5V11.5h2.6l5 8.1v-8.1H21v13h-2.6l-5-8.1v8.1H11Z" fill="#ff8a00"/>
-        </svg>
-        <span>Nooken<span class="vpn">VPN</span></span>
-      </div>
-      <div class="pill"><span class="dot"></span><span id="uid">id: —</span></div>
-    </header>
+<section class="tab on" id="home">
+  <header class="glass head">
+    <div class="brand"><svg viewBox="0 0 32 36"><path d="M16 1.5 30 6.4v11.2c0 8.6-6.4 14.6-14 16.9C8.4 32.2 2 26.2 2 17.6V6.4L16 1.5Z" fill="#fff"/><path d="M11 24.5V11.5h2.6l5 8.1v-8.1H21v13h-2.6l-5-8.1v8.1H11Z" fill="#ff8a00"/></svg><span>Nooken<i>VPN</i></span></div>
+    <div class="pill"><span class="dot"></span><span id="uid">id: —</span></div>
+  </header>
+  <div class="glass card">
+    <div class="top"><h2 class="slogan" id="slogan"></h2><div class="pill" id="st"><span class="dot"></span><span id="stt">—</span></div></div>
+    <div class="two">
+      <div class="mini"><div class="k">Истекает</div><div class="v" id="exp">—</div></div>
+      <div class="mini"><div class="k">Устройства</div><div class="v" id="dev">—</div></div>
+    </div>
+    <button class="btn pri" data-go="app_setup">🔌 Подключиться</button>
+    <button class="btn out" data-go="app_key">🔑 Ссылки устройств</button>
+    <button class="btn out" data-go="app_devices">Управлять устройствами</button>
+  </div>
+  <div class="sec">Тариф</div>
+  <div class="grid" id="tariffs"></div>
+  <button class="btn pri" id="paySbp"></button>
+  <button class="btn cry" id="payCry">💎 Оплатить криптой (USDT)</button>
+  <div class="hint">Криптой платим в USDT, точную сумму покажем в боте</div>
+  <button class="btn ghost" id="trial" data-go="app_trial" hidden></button>
+</section>
 
-    <section class="grid">
-      <div class="glass tile light">
-        <div class="label">Баланс</div>
-        <div class="big"><span id="balance">—</span> ₽</div>
-      </div>
-      <div class="glass tile">
-        <div class="label">Устройства</div>
-        <div class="big"><span id="devices">—</span><small id="devmax">из 5</small></div>
-      </div>
-      <button class="glass tile light btn" id="btn-topup" type="button">
-        <div class="plus">+</div>
-        <div class="cta">Пополнить</div>
-      </button>
-      <div class="glass tile">
-        <div class="label">Хватит на</div>
-        <div class="big"><span id="days">—</span><small id="dayword">дней</small></div>
-      </div>
-    </section>
+<section class="tab" id="refs">
+  <h1>Рефералка</h1>
+  <div class="glass card glow">
+    <div class="k" style="text-transform:none;letter-spacing:0;font:600 17px var(--ui)">За каждого друга</div>
+    <div class="big" id="rbig"></div>
+    <div style="color:var(--muted);font-size:16px" id="rsub"></div>
+  </div>
+  <div class="grid">
+    <div class="glass num"><b id="rf">0</b><span>Друзей</span></div>
+    <div class="glass num"><b id="rb">0</b><span>Дней бонуса</span></div>
+  </div>
+  <div class="sec">Ваша ссылка</div>
+  <div class="link"><span id="rlink">—</span><button class="cp" id="copy" aria-label="Копировать">⧉</button></div>
+  <button class="btn pri" id="share">Поделиться ссылкой</button>
+</section>
 
-    <section class="row">
-      <button class="pbtn" id="btn-setup" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
-        Настроить VPN
-      </button>
-      <button class="sbtn" id="btn-support" type="button">Поддержка</button>
-    </section>
+<section class="tab" id="prof">
+  <h1>Профиль</h1>
+  <div class="glass who"><div class="av" id="av">N</div><div><b id="pn">—</b><span id="pu"></span></div></div>
+  <div class="sec">Подписка</div>
+  <div class="glass rows">
+    <div class="row"><span class="ic">🛡</span><span>Статус: <b id="p1">—</b></span></div>
+    <div class="row"><span class="ic">📅</span><span>Истекает: <em id="p2">—</em></span></div>
+    <div class="row"><span class="ic">⏳</span><span>Осталось: <b class="or" id="p3">—</b></span></div>
+    <div class="row"><span class="ic">💰</span><span>Баланс: <em id="p4">—</em></span></div>
+    <button class="row" data-go="app_devices"><span class="ic">📱</span><span>Устройства: <em id="p5">—</em></span><span class="ch">›</span></button>
+  </div>
+  <div class="sec">Поддержка</div>
+  <div class="glass rows"><button class="row" id="sup"><span class="ic">💬</span><span>Написать в поддержку</span><span class="ch">›</span></button></div>
+</section>
 
-    <button class="sbtn wide" id="btn-invite" type="button">🤝 Пригласить и заработать</button>
-
-    <div class="foot">@NookenVPN_bot</div>
-  </main>
+</main>
+<nav class="bar">
+  <button class="on" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Главная</button>
+  <button data-tab="refs"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.3c2 .7 3.5 2.4 3.5 5.2"/></svg>Рефералка</button>
+  <button data-tab="prof"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg>Профиль</button>
+</nav>
+<div id="toast"></div>
 
 <script>
-  const BOT_USERNAME = "NookenVPN_bot";
-  const SUPPORT_USERNAME = "Lov1rus";
+/* ===== НАСТРОЙКИ ===== */
+const BOT="NookenVPN_bot", SUPPORT="Lov1rus", SLOGAN="Быстро. Безопасно. Без границ.";
+const DEF_TARIFFS="m1.199.30.0,m3.529.90.10,m6.959.180.18,m12.1699.365.25"; // запасной вариант; бот передаёт свои тарифы
 
-  const tg = window.Telegram && window.Telegram.WebApp;
-  try {
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      if (tg.setHeaderColor) tg.setHeaderColor("#0F1620");
-      if (tg.setBackgroundColor) tg.setBackgroundColor("#0F1620");
-    }
-  } catch (e) {}
+const tg=window.Telegram&&window.Telegram.WebApp, q=new URLSearchParams(location.search);
+const $=id=>document.getElementById(id), n=k=>{const v=parseInt(q.get(k),10);return isNaN(v)?null:v};
+const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5?b:u===1?a:c};
+try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
+const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
+const uid=n("u")||tu.id||0, exp=n("ex")||0, dev=n("d"), max=n("m"), bal=n("b");
+const rd=n("rd")??3, rf=n("rf")||0, rb=n("rb")??rf*rd, trial=n("tr")||0;
+const tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
+let sel=(tariffs.find(t=>t.k==="m3")||tariffs[0]).k;
 
-  const q = new URLSearchParams(location.search);
-  const num = (key) => {
-    const v = parseInt(q.get(key), 10);
-    return Number.isFinite(v) ? v : null;
-  };
-  const set = (id, text) => { document.getElementById(id).textContent = text; };
-  const plural = (n, one, few, many) => {
-    const a = Math.abs(n) % 100, b = a % 10;
-    if (a > 10 && a < 20) return many;
-    if (b > 1 && b < 5) return few;
-    if (b === 1) return one;
-    return many;
-  };
+const haptic=t=>{try{tg&&tg.HapticFeedback&&tg.HapticFeedback.impactOccurred(t||"light")}catch(e){}};
+const openTg=u=>{haptic();tg&&tg.openTelegramLink?tg.openTelegramLink(u):window.open(u,"_blank")};
+const go=a=>openTg("https://t.me/"+BOT+"?start="+a);
+const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1800)};
+const left=s=>{const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);
+  if(d)return d+" "+pl(d,"день","дня","дней")+(h?" "+h+" ч.":"");
+  if(h)return h+" "+pl(h,"час","часа","часов")+(m?" "+m+" мин.":"");
+  return Math.max(1,m)+" мин."};
 
-  const balance = num("b"), devices = num("d"), max = num("m"), days = num("t");
-  let uid = num("u");
-  if (!uid && tg && tg.initDataUnsafe && tg.initDataUnsafe.user) uid = tg.initDataUnsafe.user.id;
+function render(){
+  const now=Date.now()/1000, on=n("a")===1&&exp>now, dt=new Date(exp*1000);
+  $("uid").textContent="id: "+(uid||"—"); $("slogan").textContent=SLOGAN;
+  $("st").className="pill"+(on?"":" off"); $("stt").textContent=on?"Активна":"Не активна";
+  $("exp").textContent=on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
+  const dv=dev===null?"—":max===null?dev:dev+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
+  $("p1").textContent=on?"Активна":"Не активна"; $("p1").className=on?"gr":"";
+  $("p2").textContent=on?dt.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
+  $("p3").textContent=on?left(exp-now):"—"; $("p4").textContent=bal===null?"—":bal+" ₽";
+  const nm=tu.first_name||"Профиль"; $("pn").textContent=nm; $("av").textContent=nm[0].toUpperCase();
+  $("pu").textContent=tu.username?"@"+tu.username:"";
+  $("rbig").innerHTML="+"+rd+" "+pl(rd,"день","дня","дней")+"<small>бесплатно</small>";
+  $("rsub").textContent="Другу тоже +"+rd+" "+pl(rd,"день","дня","дней")+" в подарок";
+  $("rf").textContent=rf; $("rb").textContent=rb;
+  $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
+  if(trial){$("trial").hidden=false;$("trial").textContent="Попробовать "+trial+" "+pl(trial,"день","дня","дней")+" бесплатно"}
+}
+function drawTariffs(){
+  $("tariffs").innerHTML=tariffs.map(t=>{const m=Math.max(1,Math.floor(t.days/30));
+    return `<button class="tf${t.k===sel?" sel":""}" data-k="${t.k}"><span class="l">${m} ${pl(m,"месяц","месяца","месяцев")}</span><b>${t.price}<i>₽</i></b><em>${Math.round(t.price/m)} ₽/мес</em>${t.disc?`<u>−${t.disc}%</u>`:""}<span class="ck">✓</span></button>`}).join("");
+  const t=tariffs.find(x=>x.k===sel); $("paySbp").textContent="Оплатить через СБП · "+t.price+" ₽";
+}
+$("tariffs").onclick=e=>{const b=e.target.closest(".tf");if(b){sel=b.dataset.k;haptic();drawTariffs()}};
+$("paySbp").onclick=()=>go("app_pay_sbp_"+sel);
+$("payCry").onclick=()=>go("app_pay_crypto_"+sel);
+$("sup").onclick=()=>openTg("https://t.me/"+SUPPORT);
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
 
-  if (balance !== null) set("balance", balance);
-  if (devices !== null) set("devices", devices);
-  if (max !== null) set("devmax", "из " + max);
-  if (days !== null) {
-    set("days", days > 999 ? "999+" : days);
-    set("dayword", plural(days, "день", "дня", "дней"));
-  }
-  if (uid) set("uid", "id: " + uid);
+const link=()=>$("rlink").textContent;
+$("copy").onclick=async()=>{const t=link();if(t==="—")return;
+  try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(_){}a.remove()}
+  try{tg&&tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred("success")}catch(e){} toast("Ссылка скопирована")};
+$("share").onclick=()=>{const t=link();if(t==="—")return;
+  openTg("https://t.me/share/url?url="+encodeURIComponent(t)+"&text="+encodeURIComponent("Подключайся к NookenVPN по моей ссылке и получи "+rd+" "+pl(rd,"день","дня","дней")+" бесплатно! 🎁"))};
 
-  const openTg = (url) => {
-    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred("light"); } catch (e) {}
-    if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
-    else window.open(url, "_blank");
-  };
-  const botLink = (action) => "https://t.me/" + BOT_USERNAME + "?start=" + action;
+function show(tab){
+  document.querySelectorAll(".tab").forEach(s=>s.classList.toggle("on",s.id===tab));
+  document.querySelectorAll(".bar button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+  window.scrollTo(0,0); haptic();
+  try{if(tg&&tg.BackButton)tab==="home"?tg.BackButton.hide():tg.BackButton.show()}catch(e){}
+}
+document.querySelectorAll(".bar button").forEach(b=>b.onclick=()=>show(b.dataset.tab));
+try{tg&&tg.BackButton&&tg.BackButton.onClick(()=>show("home"))}catch(e){}
 
-  document.getElementById("btn-topup").onclick = () => openTg(botLink("app_buy"));
-  document.getElementById("btn-setup").onclick = () => openTg(botLink("app_setup"));
-  document.getElementById("btn-invite").onclick = () => openTg(botLink("app_ref"));
-  document.getElementById("btn-support").onclick = () => openTg("https://t.me/" + SUPPORT_USERNAME);
+render(); drawTariffs(); setInterval(render,30000);
 </script>
 </body>
 </html>
