@@ -36,14 +36,12 @@ h1{font:800 32px var(--num);margin:6px 2px 0}
 .v{font:700 20px var(--num);margin-top:8px}
 .sec{display:flex;align-items:center;gap:10px;font:700 12.5px var(--num);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:8px 2px 0}
 .sec:before{content:"";width:26px;height:3px;border-radius:2px;background:var(--orange)}
-button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:transform .12s,filter .12s,opacity .12s}button:active{transform:scale(.97)}
+button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:transform .12s,filter .12s}button:active{transform:scale(.97)}
 .btn{width:100%;height:56px;border-radius:999px;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
 .pri{background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#1d1300;border:1px solid rgba(255,255,255,.35);box-shadow:0 10px 26px rgba(255,140,0,.40),inset 0 1px 0 rgba(255,255,255,.5)}
 .out{background:transparent;border:1.5px solid rgba(255,154,26,.55);color:var(--orange-2)}
 .cry{background:rgba(80,200,220,.10);border:1.5px solid var(--cyan);color:#9fe6f2}
 .ghost{background:transparent;border:1px dashed var(--stroke);color:var(--muted);font-size:15px;height:52px}
-.dang{background:rgba(255,90,70,.14);border:1.5px solid rgba(255,110,90,.5);color:#ff9d8f}
-.ld{opacity:.55;pointer-events:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .tf{position:relative;text-align:left;padding:16px;border-radius:22px;background:var(--glass);border:1.5px solid var(--stroke);min-height:128px;display:flex;flex-direction:column;gap:6px}
 .tf.sel{border-color:var(--orange);background:rgba(255,154,26,.08);box-shadow:0 0 0 1px rgba(255,154,26,.25),0 8px 24px rgba(255,140,0,.18)}
@@ -58,8 +56,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
 .glow{position:relative;overflow:hidden}.glow:after{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(255,154,26,.35),transparent 70%)}
 .num{text-align:center;padding:22px 10px}.num b{display:block;font:800 40px var(--num)}.num span{color:var(--muted);font-weight:800;font-size:15px}
 .link{display:flex;align-items:center;gap:12px;padding:16px;border-radius:22px;background:var(--glass);border:1px solid var(--stroke)}
-.link.tap{cursor:pointer}.link.tap:active{background:var(--glass2)}
-.link span{flex:1;min-width:0;font:600 14px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;color:#bfe9f1}
+.link span{flex:1;font:600 14px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;color:#bfe9f1}
 .cp{width:48px;height:48px;border-radius:14px;background:rgba(255,154,26,.15);border:1px solid rgba(255,154,26,.4);color:var(--orange);font-size:20px;flex:none}
 .who{display:flex;align-items:center;gap:16px;padding:18px}
 .av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-2));color:#1d1300;font:800 30px var(--num);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(255,140,0,.4)}
@@ -68,23 +65,11 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
 .row+.row{border-top:1px solid var(--stroke)}
 .ic{width:46px;height:46px;border-radius:14px;background:rgba(255,154,26,.12);border:1px solid rgba(255,154,26,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
 .row em{font-style:normal;color:var(--muted);font-weight:600}.row .gr{color:#6ff0b4}.row .or{color:var(--orange-2)}.row .ch{margin-left:auto;color:var(--muted)}
-.dev{display:flex;align-items:center;gap:12px;padding:12px 0;font-size:17px;font-weight:700}
-.dev{cursor:pointer}.dev+.dev{border-top:1px solid var(--stroke)}
-.dev .nm{flex:1;min-width:0;overflow-wrap:anywhere}.dev .nm em{display:block;font-style:normal;color:var(--muted);font-weight:600;font-size:14px;margin-top:2px}
-.rb{width:42px;height:42px;border-radius:13px;background:var(--glass);border:1px solid var(--stroke);font-size:18px;flex:none}
 .bar{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:432px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;border-radius:30px;background:rgba(10,16,23,.88);border:1px solid var(--stroke);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 .bar button{background:none;border-radius:22px;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted);font:700 11.5px var(--num);letter-spacing:.1em;text-transform:uppercase}
 .bar button.on{background:rgba(255,154,26,.14);box-shadow:inset 0 0 0 1px rgba(255,154,26,.45);color:var(--orange)}
 .bar svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#toast{position:fixed;left:50%;bottom:110px;z-index:40;transform:translate(-50%,20px);width:max-content;max-width:calc(100% - 32px);text-align:center;background:rgba(10,16,23,.96);border:1px solid var(--cyan);padding:12px 18px;border-radius:14px;font-weight:800;opacity:0;pointer-events:none;transition:.25s}#toast.on{opacity:1;transform:translate(-50%,0)}
-.shade{position:fixed;inset:0;z-index:20;background:rgba(5,9,14,.62);opacity:0;pointer-events:none;transition:opacity .2s}.shade.on{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-width:460px;margin:0 auto;max-height:88vh;overflow-y:auto;padding:22px 18px calc(22px + env(safe-area-inset-bottom,0px));background:rgba(15,22,32,.97);border:1px solid var(--stroke);border-bottom:0;border-radius:28px 28px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.45);transform:translateY(105%);transition:transform .25s ease;visibility:hidden}
-.sheet.on{transform:none;visibility:visible}
-.sheet h3{font:800 22px/1.25 var(--num);margin:0 0 6px}
-.sheet p{color:var(--muted);margin:6px 0 14px;font-size:15px;line-height:1.5}
-.lk{margin-top:12px}.lk b{display:block;font-weight:800;margin:0 0 6px 2px}
-.inp{width:100%;height:54px;border-radius:16px;background:var(--glass);border:1.5px solid var(--stroke);color:#fff;font:700 17px var(--ui);padding:0 16px;outline:none;-webkit-user-select:text;user-select:text}
-.inp:focus{border-color:var(--orange)}
+#toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:rgba(10,16,23,.95);border:1px solid var(--cyan);padding:12px 18px;border-radius:14px;font-weight:800;opacity:0;pointer-events:none;transition:.25s}#toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
@@ -102,21 +87,16 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
       <div class="mini"><div class="k">Истекает</div><div class="v" id="exp">—</div></div>
       <div class="mini"><div class="k">Устройства</div><div class="v" id="dev">—</div></div>
     </div>
-    <div class="link tap" id="homeLink" role="button" tabindex="0" aria-label="Скопировать ссылку"><span id="hlink"></span><button class="cp" tabindex="-1" aria-hidden="true">⧉</button></div>
-    <button class="btn pri" id="connect">🔌 Подключиться</button>
-    <button class="btn out" data-open="devs">📱 Управлять устройствами</button>
+    <button class="btn pri" data-go="app_connect">🔌 Подключиться</button>
+    <button class="btn out" data-open="devs">📱 Устройства</button>
+    <button class="btn out" data-open="devs">Управлять устройствами</button>
   </div>
   <div class="sec">Тариф</div>
   <div class="grid" id="tariffs"></div>
   <button class="btn pri" id="paySbp"></button>
   <button class="btn cry" id="payCry">💎 Оплатить криптой (USDT)</button>
-  <div class="hint">Криптой платим в USDT, точную сумму покажем при оплате</div>
-  <button class="btn ghost" id="trial"></button>
-  <div class="sec">📁 Документы</div>
-  <div class="glass rows">
-    <button class="row" data-doc="https://telegra.ph/POLITIKA-KONFIDENCIALNOSTI-08-12-99"><span class="ic">🔒</span><span>Политика конфиденциальности</span><span class="ch">›</span></button>
-    <button class="row" data-doc="https://telegra.ph/PUBLICHNAYA-OFERTA-08-12-15"><span class="ic">📄</span><span>Пользовательское соглашение</span><span class="ch">›</span></button>
-  </div>
+  <div class="hint">Криптой платим в USDT, точную сумму покажем в боте</div>
+  <button class="btn ghost" id="trial" data-go="app_trial">Попробовать 24 часа бесплатно</button>
 </section>
 
 <section class="tab" id="refs">
@@ -131,7 +111,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
     <div class="glass num"><b id="rb">0</b><span>Дней бонуса</span></div>
   </div>
   <div class="sec">Ваша ссылка</div>
-  <div class="link tap" id="refLink"><span id="rlink">—</span><button class="cp" id="copy" aria-label="Копировать">⧉</button></div>
+  <div class="link"><span id="rlink">—</span><button class="cp" id="copy" aria-label="Копировать">⧉</button></div>
   <button class="btn pri" id="share">Поделиться ссылкой</button>
 </section>
 
@@ -158,9 +138,10 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   </div>
   <div class="sec">Мои устройства</div>
   <div class="glass rows" id="dvlist"></div>
-  <button class="btn pri" id="addDev">➕ Добавить устройство</button>
-  <button class="btn out" id="linksBtn">🔑 Ссылки</button>
-  <button class="btn out" id="helpBtn">📖 Открыть инструкцию</button>
+  <button class="btn pri" data-go="app_devices">➕ Добавить устройство</button>
+  <button class="btn out" data-go="app_key">🔑 Ссылки для подключения</button>
+  <button class="btn out" data-go="app_devices">Переименовать или удалить</button>
+  <div class="hint">Добавление, ссылки и удаление выполняются в чате с ботом</div>
 </section>
 
 <section class="tab" id="help">
@@ -181,14 +162,11 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   <button data-tab="refs"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.3c2 .7 3.5 2.4 3.5 5.2"/></svg>Рефералка</button>
   <button data-tab="prof"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7"/></svg>Профиль</button>
 </nav>
-<div class="shade" id="shade"></div>
-<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 <div id="toast"></div>
 
 <script>
 /* ===== НАСТРОЙКИ ===== */
 const BOT="NookenVPN_bot", SUPPORT="Lov1rus", SLOGAN="Быстро. Безопасно. Без границ.";
-const CONNECT_LINK="https://t.me/"+BOT;   // ссылка над кнопкой «Подключиться» (копируется по нажатию), можно заменить на любую
 const DEF_TARIFFS="m1.199.30.0,m3.529.90.10,m6.959.180.18,m12.1699.365.25"; // запасной вариант; бот передаёт свои тарифы
 
 const tg=window.Telegram&&window.Telegram.WebApp, q=new URLSearchParams(location.search);
@@ -196,260 +174,71 @@ const $=id=>document.getElementById(id), n=k=>{const v=parseInt(q.get(k),10);ret
 const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5?b:u===1?a:c};
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
-const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — кнопки открывают бота, как раньше
+const uid=n("u")||tu.id||0, exp=n("ex")||0, dev=n("d"), max=n("m"), bal=n("b");
+const rd=n("rd")??3, rf=n("rf")||0, rb=n("rb")??rf*rd, trial=n("tr")||0, dc=n("dc")??3, de=n("de")??1;
+const dvs=(()=>{try{return JSON.parse(q.get("dv")||"[]")}catch(e){return[]}})();
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
-const uid=n("u")||tu.id||0;
-
-/* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
-  dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
-if(S.rb===null)S.rb=S.rf*S.rd;
 const tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
 let sel=(tariffs.find(t=>t.k==="m3")||tariffs[0]).k;
 
 const haptic=t=>{try{tg&&tg.HapticFeedback&&tg.HapticFeedback.impactOccurred(t||"light")}catch(e){}};
 const openTg=u=>{haptic();tg&&tg.openTelegramLink?tg.openTelegramLink(u):window.open(u,"_blank")};
 const go=a=>openTg("https://t.me/"+BOT+"?start="+a);
-let tt;const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),t.length>40?3200:1800)};
+const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1800)};
 const left=s=>{const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);
   if(d)return d+" "+pl(d,"день","дня","дней")+(h?" "+h+" ч.":"");
   if(h)return h+" "+pl(h,"час","часа","часов")+(m?" "+m+" мин.":"");
   return Math.max(1,m)+" мин."};
 
-/* ===== Автономный режим: пока нет сервера, устройства и пробный период живут в самом приложении ===== */
-const NAMES=["Барсик","Мурзик","Пушок","Снежок","Рыжик","Тигра","Симба","Мурка","Багира","Пуся","Персик","Дымок","Лаки","Пирожок","Зефир","Клёпа","Шустрик","Соня","Бусинка","Вафля","Конфета","Ириска","Тоша","Марсик","Кекс","Гоша","Булочка","Компот","Пончик","Маршмеллоу","Ушастик","Хвостик","Лапуля","Мотя","Нюша","Луна","Ясик","Фиса","Масяня","Бегемот","Космос","Шерлок","Оскар","Рафаэлло","Сметанка","Сосиска","Тапочек","Цветик","Чижик","Уголёк","Мандарин","Карамелька","Бублик","Крошка","Милка","Пират","Граф","Мурлыка","Звёздочка","Хлопушка","Снежинка","Ватрушка","Пряник","Сфинкс","Эльф","Дюшес","Кузя","Тимошка","Шоколадка","Лисёнок","Бантик","Васька","Котлета","Облачко","Пампушка","Рыжуля","Фасолька","Сахарок","Тучка","Яшка"];
-const makeLink=()=>CONNECT_LINK;   // ссылка, которую выдаём устройству и пробному периоду. Позже сюда встанет выдача vless
-const LS="nk_"+uid;
-let L=(()=>{try{return JSON.parse(localStorage.getItem(LS)||"{}")||{}}catch(e){return{}}})();
-const lsSave=()=>{try{localStorage.setItem(LS,JSON.stringify(L))}catch(e){}};
-function syncLocal(){
-  if(API)return;
-  if(!Array.isArray(L.devs)){L.devs=S.dv.map((d,i)=>({id:i+1,name:d.name,link:makeLink(),on:d.on?1:0}));L.nid=L.devs.length+1;L.used=L.devs.map(d=>d.name);lsSave()}
-  S.dv=L.devs;S.d=L.devs.length;if(S.m===null)S.m=5;
-}
-function eff(){const now=Date.now()/1000;let ex=S.a===1?S.ex:0;if(L.trialUntil>ex)ex=L.trialUntil;return{on:ex>now,ex}}
-function kitten(){
-  const used=new Set((L.used||[]).concat(L.devs.map(d=>d.name)).map(s=>s.toLowerCase()));
-  const fresh=NAMES.filter(x=>!used.has(x.toLowerCase()));
-  if(fresh.length)return fresh[Math.floor(Math.random()*fresh.length)];
-  const b=NAMES[Math.floor(Math.random()*NAMES.length)];let i=2;while(used.has((b+" "+i).toLowerCase()))i++;return b+" "+i;
-}
-function localAct(a,b){
-  const now=Date.now()/1000, max=S.m||5, fin=x=>{lsSave();syncLocal();render();return Object.assign({ok:true},x)};
-  if(a==="dev_add"){
-    if(L.devs.length>=max)return{ok:false,error:"Больше "+max+" устройств подключить нельзя"};
-    if(!eff().on)return{ok:false,error:"Сначала оформи подписку или возьми пробный период"};
-    const name=kitten(),link=makeLink();
-    L.devs.push({id:L.nid++,name,link,on:0});L.used=(L.used||[]).concat(name);
-    return fin({name,link});
-  }
-  if(a==="dev_links")return{ok:true,links:L.devs.map(d=>({id:d.id,name:d.name,link:d.link||makeLink()}))};
-  if(a==="dev_rename"){
-    const d=L.devs.find(x=>x.id===b.id);if(!d)return{ok:false,error:"Устройство не найдено"};
-    const name=String(b.name||"").split(/\s+/).filter(Boolean).join(" ");
-    if(!name||name.length>20)return{ok:false,error:"Имя должно быть от 1 до 20 символов. Попробуй ещё раз."};
-    if(L.devs.some(x=>x.id!==d.id&&x.name.toLowerCase()===name.toLowerCase()))return{ok:false,error:"У тебя уже есть устройство с таким именем. Придумай другое."};
-    d.name=name;L.used=(L.used||[]).concat(name);return fin();
-  }
-  if(a==="dev_del"){
-    if(!L.devs.some(x=>x.id===b.id))return{ok:false,error:"Устройство не найдено"};
-    L.devs=L.devs.filter(x=>x.id!==b.id);return fin();
-  }
-  if(a==="trial"){
-    if(L.trialUntil>now)return{ok:true,title:"Пробный период активен",left:left(L.trialUntil-now),key:makeLink()};
-    const paid=S.a===1&&S.ex>now;
-    if(L.trialUntil||S.tr===0)return paid?{ok:false,error:"У тебя уже есть активная подписка"}:{ok:true,ended:true};
-    if(paid)return{ok:false,error:"У тебя уже есть активная подписка"};
-    const days=S.tr||1;L.trialUntil=now+days*86400;
-    return fin({title:"Пробный период на "+days+" дн. активирован!",key:makeLink()});
-  }
-  return{ok:false,error:"Неизвестное действие"};
-}
-const act=(a,b)=>API?call(a,b):Promise.resolve(localAct(a,b||{}));
-syncLocal();
-
-/* ===== Сервер бота ===== */
-async function call(action,body){
-  try{
-    const r=await fetch(API+"/api/"+action,{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(Object.assign({initData:(tg&&tg.initData)||""},body||{}))});
-    const j=await r.json();
-    if(j&&j.state){applyState(j.state)}
-    return j||{ok:false,error:"Пустой ответ сервера"};
-  }catch(e){return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
-}
-function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
-  if(Array.isArray(s.dv))S.dv=s.dv;
-  render();
-}
-let busy=false;
-async function withBtn(b,fn){if(busy)return;busy=true;if(b)b.classList.add("ld");try{await fn()}finally{busy=false;if(b)b.classList.remove("ld")}}
-
-/* ===== Копирование ===== */
-async function copyText(t,msg){
-  let ok=false;
-  try{await navigator.clipboard.writeText(t);ok=true}catch(e){}
-  if(!ok){const a=document.createElement("textarea");a.value=t;a.setAttribute("readonly","");
-    a.style.cssText="position:fixed;top:0;left:0;opacity:0;-webkit-user-select:text;user-select:text";
-    document.body.appendChild(a);a.focus();a.select();try{a.setSelectionRange(0,t.length)}catch(_){}
-    try{ok=document.execCommand("copy")}catch(_){}a.remove()}
-  try{tg&&tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred(ok?"success":"error")}catch(e){}
-  toast(ok?(msg||"Ссылка скопирована"):"Не удалось скопировать");
-}
-
-/* ===== Нижняя шторка ===== */
-const sheet=$("sheet"), shade=$("shade"); let sheetDo=null;
-function openSheet(html,doFn){sheet.innerHTML=html;sheetDo=doFn||null;sheet.scrollTop=0;shade.classList.add("on");sheet.classList.add("on");haptic()}
-function closeSheet(){shade.classList.remove("on");sheet.classList.remove("on");sheetDo=null;try{document.activeElement&&document.activeElement.blur()}catch(e){}}
-shade.onclick=closeSheet;
-sheet.onclick=e=>{
-  const c=e.target.closest("[data-copy]");if(c){copyText(c.dataset.copy,c.dataset.msg);return}
-  if(e.target.closest("[data-help]")){closeSheet();show("help");return}
-  if(e.target.closest("[data-close]")){closeSheet();return}
-  if(e.target.closest("[data-buy]")){closeSheet();show("home");setTimeout(()=>$("tariffs").scrollIntoView({behavior:"smooth",block:"center"}),80);return}
-  const r2=e.target.closest("[data-rn2]"),d2=e.target.closest("[data-dl2]");
-  if(r2||d2){const d=S.dv.find(v=>v.id===+(r2||d2).dataset[r2?"rn2":"dl2"]);if(d)r2?renameSheet(d):deleteSheet(d);return}
-  const f=e.target.closest("[data-do]");if(f&&sheetDo)withBtn(f,sheetDo);
-};
-sheet.onkeydown=e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){const f=sheet.querySelector("[data-do]");if(f)f.click()}};
-const linkBox=(t,msg)=>`<div class="link tap" data-copy="${esc(t)}"${msg?` data-msg="${esc(msg)}"`:""}><span>${esc(t)}</span><button class="cp" aria-label="Копировать">⧉</button></div>`;
-
-/* ===== Устройства ===== */
-async function addDevice(){
-  await withBtn($("addDev"),async()=>{
-    const j=await act("dev_add");
-    if(!j.ok)return toast(j.error);
-    haptic("medium");
-    openSheet(`<h3>✅ Место для «${esc(j.name)}» готово</h3><p>Подключи устройство по его личной ссылке (нажми на неё, чтобы скопировать):</p>${linkBox(j.link)}
-      <button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>📱 К устройствам</button>`);
-  });
-}
-async function showLinks(){
-  await withBtn($("linksBtn"),async()=>{
-    const j=await act("dev_links");
-    if(!j.ok)return toast(j.error);
-    if(!j.links.length)return toast("Устройств пока нет");
-    openSheet(`<h3>🔑 Ссылки устройств</h3><p>Нажми на ссылку, чтобы скопировать:</p>`+
-      j.links.map(l=>`<div class="lk"><b>🐾 ${esc(l.name)}</b>${linkBox(l.link)}</div>`).join("")+
-      `<button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>↩️ К устройствам</button>`);
-  });
-}
-function renameSheet(d){
-  openSheet(`<h3>✏️ Новое имя для «${esc(d.name)}»</h3><p>До 20 символов.</p>
-    <input class="inp" id="rnIn" maxlength="20" value="${esc(d.name)}" autocomplete="off" autocapitalize="sentences">
-    <button class="btn pri" data-do>Сохранить</button><button class="btn out" data-close>↩️ Отмена</button>`,
-  async()=>{
-    const j=await act("dev_rename",{id:d.id,name:$("rnIn").value});
-    if(!j.ok)return toast(j.error);
-    closeSheet();toast("Имя изменено");
-  });
-  setTimeout(()=>{const i=$("rnIn");if(i){i.focus();i.select()}},320);
-}
-function deleteSheet(d){
-  openSheet(`<h3>🗑 Удалить «${esc(d.name)}»?</h3><p>Устройство отключится, и место освободится.</p>
-    <button class="btn dang" data-do>✅ Да, удалить</button><button class="btn out" data-close>↩️ Отмена</button>`,
-  async()=>{
-    const j=await act("dev_del",{id:d.id});
-    if(!j.ok)return toast(j.error);
-    closeSheet();toast("Устройство удалено");
-  });
-}
-async function openDevice(d){
-  const j=await act("dev_links"); if(!j.ok)return toast(j.error);
-  const x=j.links.find(l=>l.id===d.id); if(!x)return;
-  openSheet(`<h3>🐾 ${esc(d.name)}</h3><p>Личная ссылка устройства (нажми на неё, чтобы скопировать):</p>${linkBox(x.link)}
-    <button class="btn pri" data-help>📖 Открыть инструкцию</button>
-    <div class="grid" style="margin-top:10px"><button class="btn out" style="margin:0" data-rn2="${d.id}">✏️ Имя</button><button class="btn dang" style="margin:0" data-dl2="${d.id}">🗑 Удалить</button></div>
-    <button class="btn ghost" style="margin-top:10px" data-close>Закрыть</button>`);
-}
-$("dvlist").onclick=e=>{
-  const r=e.target.closest("[data-rn]"),x=e.target.closest("[data-dl]"),row=e.target.closest(".dev");
-  const id=r?+r.dataset.rn:x?+x.dataset.dl:row?+row.dataset.id:null; if(id===null||isNaN(id))return;
-  const d=S.dv.find(v=>v.id===id); if(!d)return;
-  haptic(); r?renameSheet(d):x?deleteSheet(d):openDevice(d);
-};
-
-/* ===== Пробный период ===== */
-async function doTrial(){
-  await withBtn($("trial"),async()=>{
-    const j=await act("trial");
-    if(!j.ok)return toast(j.error);
-    if(j.ended){   // как в боте: пробный период закончился
-      openSheet(`<h3>⌛ Ваш пробный период закончен</h3><p>Чтобы продолжить пользоваться VPN, оформи подписку.</p>
-        <button class="btn pri" data-buy>🛒 Купить / продлить</button><button class="btn out" data-close>Закрыть</button>`);
-      return;
-    }
-    haptic("medium");
-    openSheet(`<h3>🎁 ${esc(j.title)}</h3>${j.left?`<p>⏳ Осталось: ${esc(j.left)}</p>`:""}<p>Твой ключ (нажми, чтобы скопировать):</p>${linkBox(j.key,"Ключ скопирован")}
-      <button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>Готово</button>`);
-  });
-}
-
-/* ===== Оплата: как в боте, способы пока заглушки ===== */
-const pay=m=>toast("Этот способ оплаты скоро будет доступен");
-
-/* ===== Отрисовка ===== */
 function render(){
-  const now=Date.now()/1000, E=eff(), on=E.on, dt=new Date(E.ex*1000), dev=S.d, max=S.m;
-  $("uid").textContent="id: "+(uid||"—"); $("slogan").textContent=SLOGAN; $("hlink").textContent=CONNECT_LINK;
+  const now=Date.now()/1000, on=n("a")===1&&exp>now, dt=new Date(exp*1000);
+  $("uid").textContent="id: "+(uid||"—"); $("slogan").textContent=SLOGAN;
   $("st").className="pill"+(on?"":" off"); $("stt").textContent=on?"Активна":"Не активна";
   $("exp").textContent=on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
   const dv=dev===null?"—":max===null?dev:dev+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
   $("p1").textContent=on?"Активна":"Не активна"; $("p1").className=on?"gr":"";
   $("p2").textContent=on?dt.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
-  $("p3").textContent=on?left(E.ex-now):"—"; $("p4").textContent=S.b===null?"—":S.b+" ₽";
+  $("p3").textContent=on?left(exp-now):"—"; $("p4").textContent=bal===null?"—":bal+" ₽";
   const nm=tu.first_name||"Профиль"; $("pn").textContent=nm; $("av").textContent=nm[0].toUpperCase();
   $("pu").textContent=tu.username?"@"+tu.username:"";
-  $("rbig").innerHTML="+"+S.rd+" "+pl(S.rd,"день","дня","дней")+"<small>бесплатно</small>";
-  $("rsub").textContent="Другу тоже +"+S.rd+" "+pl(S.rd,"день","дня","дней")+" в подарок";
-  $("rf").textContent=S.rf; $("rb").textContent=S.rb;
+  $("rbig").innerHTML="+"+rd+" "+pl(rd,"день","дня","дней")+"<small>бесплатно</small>";
+  $("rsub").textContent="Другу тоже +"+rd+" "+pl(rd,"день","дня","дней")+" в подарок";
+  $("rf").textContent=rf; $("rb").textContent=rb;
   $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
-  const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
+  const h=(trial||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
   $("dvn").innerHTML=(dev===null?"—":dev)+"<small>из "+(max===null?5:max)+"</small>";
-  $("dvcost").innerHTML="1 устройство — "+S.dc+" ₽/сут<br>2 устройства — "+(S.dc+S.de)+" ₽/сут<br>каждое следующее — плюс "+S.de+" ₽<br><b style='color:#fff'>Сейчас выходит: "+(dev>0?S.dc+(dev-1)*S.de:0)+" ₽/сут</b>";
-  $("dvlist").innerHTML=S.dv.length?S.dv.map(d=>`<div class="dev" data-id="${d.id}"><span class="ic">🐾</span><div class="nm">${esc(d.name)}<em>${d.on?"подключено":"не подключено"}</em></div>${d.id!==null?`<button class="rb" data-rn="${d.id}" aria-label="Переименовать">✏️</button><button class="rb" data-dl="${d.id}" aria-label="Удалить">🗑</button>`:""}</div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного устройства</em></span></div>';
+  $("dvcost").innerHTML="1 устройство — "+dc+" ₽/сут<br>2 устройства — "+(dc+de)+" ₽/сут<br>каждое следующее — плюс "+de+" ₽<br><b style='color:#fff'>Сейчас выходит: "+(dev>0?dc+(dev-1)*de:0)+" ₽/сут</b>";
+  $("dvlist").innerHTML=dvs.length?dvs.map(d=>`<div class="row"><span class="ic">🐾</span><span>${esc(d[0])} <em>· ${d[1]?"подключено":"не подключено"}</em></span></div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного устройства</em></span></div>';
 }
 function drawTariffs(){
   $("tariffs").innerHTML=tariffs.map(t=>{const m=Math.max(1,Math.floor(t.days/30));
     return `<button class="tf${t.k===sel?" sel":""}" data-k="${t.k}"><span class="l">${m} ${pl(m,"месяц","месяца","месяцев")}</span><b>${t.price}<i>₽</i></b><em>${Math.round(t.price/m)} ₽/мес</em>${t.disc?`<u>−${t.disc}%</u>`:""}<span class="ck">✓</span></button>`}).join("");
   const t=tariffs.find(x=>x.k===sel); $("paySbp").textContent="Оплатить через СБП · "+t.price+" ₽";
 }
-
-/* ===== Кнопки ===== */
 $("tariffs").onclick=e=>{const b=e.target.closest(".tf");if(b){sel=b.dataset.k;haptic();drawTariffs()}};
-$("paySbp").onclick=()=>pay("sbp");
-$("payCry").onclick=()=>pay("crypto");
+$("paySbp").onclick=()=>go("app_pay_sbp_"+sel);
+$("payCry").onclick=()=>go("app_pay_crypto_"+sel);
 $("chat").onclick=()=>openTg("https://t.me/"+SUPPORT);
-$("connect").onclick=()=>show("devs");
-$("addDev").onclick=addDevice;
-$("linksBtn").onclick=showLinks;
-$("helpBtn").onclick=()=>show("help");
-$("trial").onclick=doTrial;
 document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>show(b.dataset.open));
-document.querySelectorAll("[data-doc]").forEach(b=>b.onclick=()=>{haptic();const u=b.dataset.doc;try{tg&&tg.openLink?tg.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}});
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
 
-$("homeLink").onclick=()=>copyText(CONNECT_LINK);
-$("homeLink").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();copyText(CONNECT_LINK)}};
-const refLink=()=>$("rlink").textContent;
-$("refLink").onclick=()=>{const t=refLink();if(t!=="—")copyText(t)};
-$("share").onclick=()=>{const t=refLink();if(t==="—")return;
-  openTg("https://t.me/share/url?url="+encodeURIComponent(t)+"&text="+encodeURIComponent("Подключайся к NookenVPN по моей ссылке и получи "+S.rd+" "+pl(S.rd,"день","дня","дней")+" бесплатно! 🎁"))};
+const link=()=>$("rlink").textContent;
+$("copy").onclick=async()=>{const t=link();if(t==="—")return;
+  try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(_){}a.remove()}
+  try{tg&&tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred("success")}catch(e){} toast("Ссылка скопирована")};
+$("share").onclick=()=>{const t=link();if(t==="—")return;
+  openTg("https://t.me/share/url?url="+encodeURIComponent(t)+"&text="+encodeURIComponent("Подключайся к NookenVPN по моей ссылке и получи "+rd+" "+pl(rd,"день","дня","дней")+" бесплатно! 🎁"))};
 
 function show(tab){
-  closeSheet();
   document.querySelectorAll(".tab").forEach(s=>s.classList.toggle("on",s.id===tab));
   document.querySelectorAll(".bar button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
   window.scrollTo(0,0); haptic();
   try{if(tg&&tg.BackButton)tab==="home"?tg.BackButton.hide():tg.BackButton.show()}catch(e){}
 }
 document.querySelectorAll(".bar button").forEach(b=>b.onclick=()=>show(b.dataset.tab));
-try{tg&&tg.BackButton&&tg.BackButton.onClick(()=>sheet.classList.contains("on")?closeSheet():show("home"))}catch(e){}
+try{tg&&tg.BackButton&&tg.BackButton.onClick(()=>show("home"))}catch(e){}
 
 render(); drawTariffs(); setInterval(render,30000);
-/* свежие данные с сервера: при открытии и при возврате в приложение */
-const refresh=()=>{if(API&&tg&&tg.initData)call("state")};
-refresh(); document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
 </script>
 </body>
 </html>
