@@ -103,8 +103,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
       <div class="mini"><div class="k">Устройства</div><div class="v" id="dev">—</div></div>
     </div>
     <div class="link tap" id="homeLink" role="button" tabindex="0" aria-label="Скопировать ссылку"><span id="hlink"></span><button class="cp" tabindex="-1" aria-hidden="true">⧉</button></div>
-    <button class="btn pri" id="connect">🔌 Подключиться</button>
-    <button class="btn out" data-open="devs">📱 Управлять устройствами</button>
+    <button class="btn pri" data-open="devs">📱 Управлять устройствами</button>
   </div>
   <div class="sec">Тариф</div>
   <div class="grid" id="tariffs"></div>
@@ -426,22 +425,6 @@ $("tariffs").onclick=e=>{const b=e.target.closest(".tf");if(b){sel=b.dataset.k;h
 $("paySbp").onclick=()=>pay("sbp");
 $("payCry").onclick=()=>pay("crypto");
 $("chat").onclick=()=>openTg("https://t.me/"+SUPPORT);
-/* «Подключиться» открывает приложение Happ для устройства человека (ссылки с официального сайта happ.su) */
-const HAPP={
-  ios:"https://apps.apple.com/ru/app/happ-lite/id6799917773",
-  android:"https://play.google.com/store/apps/details?id=com.happproxy",
-  macos:"https://apps.apple.com/ru/app/happ-proxy-utility/id6783623643",
-  windows:"https://github.com/Happ-proxy/happ-desktop/releases/latest/download/setup-Happ.x64.exe",
-  other:"https://www.happ.su/main/ru"};
-function happUrl(){
-  const p=((tg&&tg.platform)||"").toLowerCase(), ua=navigator.userAgent||"";
-  if(p==="ios"||/iPhone|iPad|iPod/i.test(ua))return HAPP.ios;
-  if(p==="android"||/Android/i.test(ua))return HAPP.android;
-  if(p==="macos"||/Macintosh|Mac OS X/i.test(ua))return HAPP.macos;
-  if(/Windows/i.test(ua))return HAPP.windows;
-  return HAPP.other;
-}
-$("connect").onclick=()=>{haptic();const u=happUrl();try{tg&&tg.openLink?tg.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}};
 $("addDev").onclick=addDevice;
 $("linksBtn").onclick=showLinks;
 $("helpBtn").onclick=()=>show("help");
