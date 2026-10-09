@@ -417,7 +417,9 @@ function render(){
   const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
   $("dvn").innerHTML=(dev===null?"—":dev)+"<small>из "+(max===null?5:max)+"</small>";
   $("dvcost").innerHTML="1 устройство — "+S.dc+" ₽/сут<br>2 устройства — "+(S.dc+S.de)+" ₽/сут<br>каждое следующее — плюс "+S.de+" ₽<br><b style='color:#fff'>Сейчас выходит: "+(dev>0?S.dc+(dev-1)*S.de:0)+" ₽/сут</b>";
-  $("dvhint").textContent=({none:"⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны",wait:"Проверяю связь с ботом…",ok:"✅ Связь с ботом есть: всё общее",fail:"⚠️ Сервер бота недоступен: данные могут быть старыми"})[linkState]+" · "+APP_V;
+  /* надпись про связь с ботом показываем только когда что-то не так */
+  $("dvhint").textContent=({none:"⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны",fail:"⚠️ Сервер бота недоступен: данные могут быть старыми"})[linkState]||"";
+  $("dvhint").style.display=(linkState==="none"||linkState==="fail")?"":"none";
   $("dvlist").innerHTML=S.dv.length?S.dv.map(d=>`<div class="dev" data-id="${d.id}"><span class="ic">🐾</span><div class="nm">${esc(d.name)}<em>${d.on?"подключено":"не подключено"}</em></div>${d.id!==null?`<button class="rb" data-rn="${d.id}" aria-label="Переименовать">✏️</button><button class="rb" data-dl="${d.id}" aria-label="Удалить">🗑</button>`:""}</div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного устройства</em></span></div>';
 }
 function drawTariffs(){
