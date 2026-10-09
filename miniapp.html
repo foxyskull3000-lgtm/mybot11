@@ -88,15 +88,15 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
       <div class="mini"><div class="k">Устройства</div><div class="v" id="dev">—</div></div>
     </div>
     <button class="btn pri" data-go="app_setup">🔌 Подключиться</button>
-    <button class="btn out" data-go="app_key">🔑 Ссылки устройств</button>
-    <button class="btn out" data-go="app_devices">Управлять устройствами</button>
+    <button class="btn out" data-open="devs">📱 Устройства</button>
+    <button class="btn out" data-open="devs">Управлять устройствами</button>
   </div>
   <div class="sec">Тариф</div>
   <div class="grid" id="tariffs"></div>
   <button class="btn pri" id="paySbp"></button>
   <button class="btn cry" id="payCry">💎 Оплатить криптой (USDT)</button>
   <div class="hint">Криптой платим в USDT, точную сумму покажем в боте</div>
-  <button class="btn ghost" id="trial" data-go="app_trial" hidden></button>
+  <button class="btn ghost" id="trial" data-go="app_trial">Попробовать 24 часа бесплатно</button>
 </section>
 
 <section class="tab" id="refs">
@@ -124,10 +124,36 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
     <div class="row"><span class="ic">📅</span><span>Истекает: <em id="p2">—</em></span></div>
     <div class="row"><span class="ic">⏳</span><span>Осталось: <b class="or" id="p3">—</b></span></div>
     <div class="row"><span class="ic">💰</span><span>Баланс: <em id="p4">—</em></span></div>
-    <button class="row" data-go="app_devices"><span class="ic">📱</span><span>Устройства: <em id="p5">—</em></span><span class="ch">›</span></button>
+    <button class="row" data-open="devs"><span class="ic">📱</span><span>Устройства: <em id="p5">—</em></span><span class="ch">›</span></button>
   </div>
   <div class="sec">Поддержка</div>
-  <div class="glass rows"><button class="row" id="sup"><span class="ic">💬</span><span>Написать в поддержку</span><span class="ch">›</span></button></div>
+  <div class="glass rows"><button class="row" data-open="help"><span class="ic">💬</span><span>Написать в поддержку</span><span class="ch">›</span></button></div>
+</section>
+
+<section class="tab" id="devs">
+  <h1>Устройства</h1>
+  <div class="glass card">
+    <div class="k">Занято мест</div><div class="big" id="dvn">—</div>
+    <div style="color:var(--muted);font-size:15px;line-height:1.7" id="dvcost"></div>
+  </div>
+  <div class="sec">Мои устройства</div>
+  <div class="glass rows" id="dvlist"></div>
+  <button class="btn pri" data-go="app_devices">➕ Добавить устройство</button>
+  <button class="btn out" data-go="app_key">🔑 Ссылки для подключения</button>
+  <button class="btn out" data-go="app_devices">Переименовать или удалить</button>
+  <div class="hint">Добавление, ссылки и удаление выполняются в чате с ботом</div>
+</section>
+
+<section class="tab" id="help">
+  <h1>Поддержка</h1>
+  <div class="sec">Как подключить</div>
+  <div class="glass rows">
+    <div class="row"><span class="ic">1</span><span>Установи приложение: Happ, v2rayTun, Hiddify или v2rayNG</span></div>
+    <div class="row"><span class="ic">2</span><span>Возьми ссылку устройства в разделе «Устройства»</span></div>
+    <div class="row"><span class="ic">3</span><span>Добавь её в приложении из буфера обмена и включи VPN</span></div>
+  </div>
+  <button class="btn pri" id="chat">💬 Написать в поддержку</button>
+  <div class="hint">Откроется чат с поддержкой в Telegram</div>
 </section>
 
 </main>
@@ -149,7 +175,9 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const uid=n("u")||tu.id||0, exp=n("ex")||0, dev=n("d"), max=n("m"), bal=n("b");
-const rd=n("rd")??3, rf=n("rf")||0, rb=n("rb")??rf*rd, trial=n("tr")||0;
+const rd=n("rd")??3, rf=n("rf")||0, rb=n("rb")??rf*rd, trial=n("tr")||0, dc=n("dc")??3, de=n("de")??1;
+const dvs=(()=>{try{return JSON.parse(q.get("dv")||"[]")}catch(e){return[]}})();
+const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
 let sel=(tariffs.find(t=>t.k==="m3")||tariffs[0]).k;
 
@@ -177,7 +205,10 @@ function render(){
   $("rsub").textContent="Другу тоже +"+rd+" "+pl(rd,"день","дня","дней")+" в подарок";
   $("rf").textContent=rf; $("rb").textContent=rb;
   $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
-  if(trial){$("trial").hidden=false;$("trial").textContent="Попробовать "+trial+" "+pl(trial,"день","дня","дней")+" бесплатно"}
+  const h=(trial||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
+  $("dvn").innerHTML=(dev===null?"—":dev)+"<small>из "+(max===null?5:max)+"</small>";
+  $("dvcost").innerHTML="1 устройство — "+dc+" ₽/сут<br>2 устройства — "+(dc+de)+" ₽/сут<br>каждое следующее — плюс "+de+" ₽<br><b style='color:#fff'>Сейчас выходит: "+(dev>0?dc+(dev-1)*de:0)+" ₽/сут</b>";
+  $("dvlist").innerHTML=dvs.length?dvs.map(d=>`<div class="row"><span class="ic">🐾</span><span>${esc(d[0])} <em>· ${d[1]?"подключено":"не подключено"}</em></span></div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного устройства</em></span></div>';
 }
 function drawTariffs(){
   $("tariffs").innerHTML=tariffs.map(t=>{const m=Math.max(1,Math.floor(t.days/30));
@@ -187,7 +218,8 @@ function drawTariffs(){
 $("tariffs").onclick=e=>{const b=e.target.closest(".tf");if(b){sel=b.dataset.k;haptic();drawTariffs()}};
 $("paySbp").onclick=()=>go("app_pay_sbp_"+sel);
 $("payCry").onclick=()=>go("app_pay_crypto_"+sel);
-$("sup").onclick=()=>openTg("https://t.me/"+SUPPORT);
+$("chat").onclick=()=>openTg("https://t.me/"+SUPPORT);
+document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>show(b.dataset.open));
 document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
 
 const link=()=>$("rlink").textContent;
