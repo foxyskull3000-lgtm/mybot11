@@ -160,6 +160,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   <button class="btn pri" id="addDev">➕ Добавить устройство</button>
   <button class="btn out" id="linksBtn">🔑 Ссылки</button>
   <button class="btn out" id="helpBtn">📖 Открыть инструкцию</button>
+  <div class="hint" id="dvhint">⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны</div>
 </section>
 
 <section class="tab" id="help">
@@ -200,12 +201,14 @@ const $=id=>document.getElementById(id), n=k=>{const v=parseInt(q.get(k),10);ret
 const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5?b:u===1?a:c};
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
-const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — кнопки открывают бота, как раньше
+const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
+const APP_V="v8";                                   // версия страницы (видна внизу вкладки «Устройства»)
+let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
 
 /* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
+const S={tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
   dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
 if(S.rb===null)S.rb=S.rf*S.rd;
 const tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
@@ -278,12 +281,13 @@ async function call(action,body){
     const r=await fetch(API+"/api/"+action,{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify(Object.assign({initData:(tg&&tg.initData)||""},body||{}))});
     const j=await r.json();
-    if(j&&j.state){applyState(j.state)}
+    linkState="ok";
+    if(j&&j.state){applyState(j.state)}else render();
     return j||{ok:false,error:"Пустой ответ сервера"};
-  }catch(e){return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
+  }catch(e){linkState="fail";render();return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
 }
 function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
+  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de","tp"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
   if(Array.isArray(s.dv))S.dv=s.dv;
   render();
 }
@@ -398,11 +402,12 @@ function render(){
   const now=Date.now()/1000, E=eff(), on=E.on, dt=new Date(E.ex*1000), dev=S.d, max=S.m;
   $("uid").textContent="id: "+(uid||"—"); $("slogan").textContent=SLOGAN; $("hlink").textContent=CONNECT_LINK;
   $("st").className="pill"+(on?"":" off"); $("stt").textContent=on?"Активна":"Не активна";
-  $("exp").textContent=on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
+  const wait=on&&S.tp===1;   // пробный выдан, но человек ещё не подключился: таймер не пошёл
+  $("exp").textContent=wait?"с подключения":on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
   const dv=dev===null?"—":max===null?dev:dev+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
   $("p1").textContent=on?"Активна":"Не активна"; $("p1").className=on?"gr":"";
-  $("p2").textContent=on?dt.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
-  $("p3").textContent=on?left(E.ex-now):"—"; $("p4").textContent=S.b===null?"—":S.b+" ₽";
+  $("p2").textContent=wait?"после первого подключения":on?dt.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
+  $("p3").textContent=wait?"таймер пойдёт с подключения":on?left(E.ex-now):"—"; $("p4").textContent=S.b===null?"—":S.b+" ₽";
   const nm=tu.first_name||"Профиль"; $("pn").textContent=nm; $("av").textContent=nm[0].toUpperCase();
   $("pu").textContent=tu.username?"@"+tu.username:"";
   $("rbig").innerHTML="+"+S.rd+" "+pl(S.rd,"день","дня","дней")+"<small>бесплатно</small>";
@@ -412,6 +417,7 @@ function render(){
   const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
   $("dvn").innerHTML=(dev===null?"—":dev)+"<small>из "+(max===null?5:max)+"</small>";
   $("dvcost").innerHTML="1 устройство — "+S.dc+" ₽/сут<br>2 устройства — "+(S.dc+S.de)+" ₽/сут<br>каждое следующее — плюс "+S.de+" ₽<br><b style='color:#fff'>Сейчас выходит: "+(dev>0?S.dc+(dev-1)*S.de:0)+" ₽/сут</b>";
+  $("dvhint").textContent=({none:"⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны",wait:"Проверяю связь с ботом…",ok:"✅ Связь с ботом есть: всё общее",fail:"⚠️ Сервер бота недоступен: данные могут быть старыми"})[linkState]+" · "+APP_V;
   $("dvlist").innerHTML=S.dv.length?S.dv.map(d=>`<div class="dev" data-id="${d.id}"><span class="ic">🐾</span><div class="nm">${esc(d.name)}<em>${d.on?"подключено":"не подключено"}</em></div>${d.id!==null?`<button class="rb" data-rn="${d.id}" aria-label="Переименовать">✏️</button><button class="rb" data-dl="${d.id}" aria-label="Удалить">🗑</button>`:""}</div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного устройства</em></span></div>';
 }
 function drawTariffs(){
@@ -453,6 +459,7 @@ render(); drawTariffs(); setInterval(render,30000);
 /* свежие данные с сервера: при открытии и при возврате в приложение */
 const refresh=()=>{if(API&&tg&&tg.initData)call("state")};
 refresh(); document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
+setInterval(()=>{if(!document.hidden&&!busy&&!sheet.classList.contains("on"))refresh()},15000);   // изменения из бота подтягиваются сами
 </script>
 </body>
 </html>
