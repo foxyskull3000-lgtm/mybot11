@@ -112,6 +112,11 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   <button class="btn cry" id="payCry">💎 Оплатить криптой (USDT)</button>
   <div class="hint">Криптой платим в USDT, точную сумму покажем при оплате</div>
   <button class="btn ghost" id="trial"></button>
+  <div class="sec">📁 Документы</div>
+  <div class="glass rows">
+    <button class="row" data-doc="https://telegra.ph/POLITIKA-KONFIDENCIALNOSTI-08-12-99"><span class="ic">🔒</span><span>Политика конфиденциальности</span><span class="ch">›</span></button>
+    <button class="row" data-doc="https://telegra.ph/PUBLICHNAYA-OFERTA-08-12-15"><span class="ic">📄</span><span>Пользовательское соглашение</span><span class="ch">›</span></button>
+  </div>
 </section>
 
 <section class="tab" id="refs">
@@ -422,6 +427,7 @@ $("linksBtn").onclick=showLinks;
 $("helpBtn").onclick=()=>show("help");
 $("trial").onclick=doTrial;
 document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>show(b.dataset.open));
+document.querySelectorAll("[data-doc]").forEach(b=>b.onclick=()=>{haptic();const u=b.dataset.doc;try{tg&&tg.openLink?tg.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}});
 
 $("homeLink").onclick=()=>copyText(CONNECT_LINK);
 $("homeLink").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();copyText(CONNECT_LINK)}};
