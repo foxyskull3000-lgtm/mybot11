@@ -110,7 +110,8 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   <div class="grid" id="tariffs"></div>
   <button class="btn pri" id="paySbp"></button>
   <button class="btn cry" id="payCry">💎 Оплатить криптой (USDT)</button>
-  <div class="hint">Криптой платим в USDT, точную сумму покажем при оплате</div>
+  <button class="btn out" id="payAmt">💰 Пополнить на свою сумму</button>
+  <div class="hint" id="payHint">Счёт в рублях — CryptoBot сам пересчитает в USDT по курсу</div>
   <button class="btn ghost" id="trial"></button>
   <div class="sec">📁 Документы</div>
   <div class="glass rows">
@@ -203,13 +204,13 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v10";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v11";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
 
 /* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={sub:"",tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
+const S={sub:"",mp:199,me:199,mn:50,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
   dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
 if(S.rb===null)S.rb=S.rf*S.rd;
 const tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
@@ -288,7 +289,7 @@ async function call(action,body){
   }catch(e){linkState="fail";render();return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
 }
 function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de","tp","sub"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
+  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de","tp","sub","mp","me","mn","cr"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
   if(Array.isArray(s.dv))S.dv=s.dv;
   render();
 }
@@ -325,9 +326,15 @@ sheet.onkeydown=e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){const f=shee
 const linkBox=(t,msg)=>`<div class="link tap" data-copy="${esc(t)}"${msg?` data-msg="${esc(msg)}"`:""}><span>${esc(t)}</span><button class="cp" aria-label="Копировать">⧉</button></div>`;
 
 /* ===== Устройства ===== */
-async function addDevice(){
+async function addDevice(confirmed){confirmed=confirmed===true;
   await withBtn($("addDev"),async()=>{
-    const j=await act("dev_add");
+    const j=await act("dev_add",confirmed?{confirm:true}:{});
+    if(!j.ok&&j.need_confirm){   // устройство сократит оплаченные дни: спрашиваем
+      openSheet(`<h3>➕ Добавить устройство?</h3><p style="white-space:pre-line">${esc(j.text)}</p>
+        <button class="btn pri" data-do>✅ Добавить</button><button class="btn out" data-close>↩️ Отмена</button>`,
+        async()=>{closeSheet();busy=false;await addDevice(true)});
+      return;
+    }
     if(!j.ok)return toast(j.error);
     haptic("medium");
     openSheet(`<h3>✅ Место для «${esc(j.name)}» готово</h3><p>Подключи устройство по его личной ссылке (нажми на неё, чтобы скопировать):</p>${linkBox(j.link)}
@@ -396,7 +403,31 @@ async function doTrial(){
 }
 
 /* ===== Оплата: как в боте, способы пока заглушки ===== */
-const pay=m=>toast("Этот способ оплаты скоро будет доступен");
+/* Крипта: бот создаёт счёт в CryptoBot (в рублях, курс считает CryptoBot) и сразу открываем чек */
+async function payCrypto(body,btn){
+  if(!API)return toast("Оплата доступна при открытии приложения из бота");
+  await withBtn(btn,async()=>{
+    const j=await act("pay",Object.assign({method:"crypto"},body));
+    if(!j.ok)return toast(j.error);
+    haptic("medium"); toast("Открываю CryptoBot…"); openTg(j.url);
+  });
+}
+const pay=m=>m==="crypto"?payCrypto({tariff:sel},$("payCry")):toast("Оплата через СБП скоро будет доступна, пока можно криптой 💎");
+function amountSheet(){
+  const mn=S.mn||50;
+  openSheet(`<h3>💰 Пополнение</h3><p>Любая сумма от ${mn} ₽. Деньги превращаются в дни по цене твоих устройств.<br><i>Бонусы есть только у тарифов на 3, 6 и 12 месяцев.</i></p>
+    <input class="inp" id="amIn" type="number" inputmode="numeric" min="${mn}" placeholder="Например, 300">
+    <div class="hint" id="amDays" style="margin:10px 0 0"></div>
+    <button class="btn cry" data-do>💎 Оплатить криптой</button><button class="btn out" data-close>Отмена</button>`,
+  async()=>{
+    const v=parseInt($("amIn").value,10);
+    if(!(v>=mn))return toast("Минимум "+mn+" ₽");
+    closeSheet(); busy=false; await payCrypto({amount:v},$("payAmt"));
+  });
+  const i=$("amIn"); i.oninput=()=>{const v=parseInt(i.value,10),n=Math.max(1,S.d||0),mc=S.mp+(n-1)*S.me;
+    $("amDays").textContent=v>0?("≈ "+Math.floor(v/(mc*12/365))+" "+pl(Math.floor(v/(mc*12/365)),"день","дня","дней")+" при "+n+" устр."):""};
+  setTimeout(()=>i.focus(),320);
+}
 
 /* ===== Отрисовка ===== */
 function render(){
@@ -413,7 +444,7 @@ function render(){
   const dv=dev===null?"—":max===null?dev:dev+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
   $("p1").textContent=on?"Активна":"Не активна"; $("p1").className=on?"gr":"";
   $("p2").textContent=inf?"никогда":wait?"после первого подключения":on?dt.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
-  $("p3").textContent=inf?"навсегда ♾":wait?"таймер пойдёт с подключения":on?left(E.ex-now):"—"; $("p4").textContent=S.b===null?"—":S.b+" ₽";
+  $("p3").textContent=inf?"навсегда ♾":wait?"таймер пойдёт с подключения":on?left(E.ex-now):"—"; $("p4").textContent=inf?"не нужен ♾":S.b===null?"—":S.b+" ₽";
   const nm=tu.first_name||"Профиль"; $("pn").textContent=nm; $("av").textContent=nm[0].toUpperCase();
   $("pu").textContent=tu.username?"@"+tu.username:"";
   $("rbig").innerHTML="+"+S.rd+" "+pl(S.rd,"день","дня","дней")+"<small>бесплатно</small>";
@@ -422,7 +453,8 @@ function render(){
   $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
   const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
   $("dvn").innerHTML=(dev===null?"—":dev)+"<small>из "+(max===null?5:max)+"</small>";
-  $("dvcost").innerHTML="1 устройство — "+S.dc+" ₽/сут<br>2 устройства — "+(S.dc+S.de)+" ₽/сут<br>каждое следующее — плюс "+S.de+" ₽<br><b style='color:#fff'>Сейчас выходит: "+(dev>0?S.dc+(dev-1)*S.de:0)+" ₽/сут</b>";
+  const nd=Math.max(1,dev||0);
+  $("dvcost").innerHTML="1 устройство — "+S.mp+" ₽/мес<br>каждое следующее — плюс "+S.me+" ₽/мес<br><b style='color:#fff'>Сейчас выходит: "+(S.mp+(nd-1)*S.me)+" ₽/мес</b><br>Больше устройств — дни идут быстрее";
   /* надпись про связь с ботом показываем только когда что-то не так */
   $("dvhint").textContent=({none:"⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны",fail:"⚠️ Сервер бота недоступен: данные могут быть старыми"})[linkState]||"";
   $("dvhint").style.display=(linkState==="none"||linkState==="fail")?"":"none";
@@ -438,8 +470,9 @@ function drawTariffs(){
 $("tariffs").onclick=e=>{const b=e.target.closest(".tf");if(b){sel=b.dataset.k;haptic();drawTariffs()}};
 $("paySbp").onclick=()=>pay("sbp");
 $("payCry").onclick=()=>pay("crypto");
+$("payAmt").onclick=amountSheet;
 $("chat").onclick=()=>openTg("https://t.me/"+SUPPORT);
-$("addDev").onclick=addDevice;
+$("addDev").onclick=()=>addDevice(false);
 $("linksBtn").onclick=showLinks;
 $("helpBtn").onclick=()=>show("help");
 $("trial").onclick=doTrial;
