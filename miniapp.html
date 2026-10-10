@@ -102,7 +102,8 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
       <div class="mini"><div class="k">Истекает</div><div class="v" id="exp">—</div></div>
       <div class="mini"><div class="k">Устройства</div><div class="v" id="dev">—</div></div>
     </div>
-    <div class="link tap" id="homeLink" role="button" tabindex="0" aria-label="Скопировать ссылку"><span id="hlink"></span><button class="cp" tabindex="-1" aria-hidden="true">⧉</button></div>
+    <div class="k" id="hlabel" style="margin:0 2px 8px">Твоя ссылка-подписка</div>
+    <div class="link tap" id="homeLink" role="button" tabindex="0" aria-label="Скопировать ссылку"><span id="hlink"></span><button class="cp" id="hcp" tabindex="-1" aria-hidden="true">⧉</button></div>
     <button class="btn pri" data-open="devs">📱 Управлять устройствами</button>
   </div>
   <div class="sec">Тариф</div>
@@ -202,13 +203,13 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v8";                                   // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v9";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
 
 /* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
+const S={sub:"",tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
   dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
 if(S.rb===null)S.rb=S.rf*S.rd;
 const tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
@@ -287,7 +288,7 @@ async function call(action,body){
   }catch(e){linkState="fail";render();return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
 }
 function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de","tp"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
+  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de","tp","sub"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
   if(Array.isArray(s.dv))S.dv=s.dv;
   render();
 }
@@ -400,7 +401,12 @@ const pay=m=>toast("Этот способ оплаты скоро будет д�
 /* ===== Отрисовка ===== */
 function render(){
   const now=Date.now()/1000, E=eff(), on=E.on, dt=new Date(E.ex*1000), dev=S.d, max=S.m;
-  $("uid").textContent="id: "+(uid||"—"); $("slogan").textContent=SLOGAN; $("hlink").textContent=CONNECT_LINK;
+  $("uid").textContent="id: "+(uid||"—"); $("slogan").textContent=SLOGAN;
+  /* ссылка на главной: подписка юзера (приходит от бота), без неё — подсказка, что делать */
+  const hk=homeLinkKind(on);
+  $("hlabel").textContent=hk==="sub"?"Твоя ссылка-подписка":hk==="bot"?"Бот":"Подключение";
+  $("hlink").textContent=hk==="sub"?S.sub:hk==="bot"?CONNECT_LINK:hk==="dev"?"Нажми, чтобы получить ссылку для устройства":hk==="wait"?"Загружаю ссылку…":"Возьми пробный период или оплати тариф — ссылка появится здесь";
+  $("hcp").textContent=(hk==="sub"||hk==="bot")?"⧉":"›";
   $("st").className="pill"+(on?"":" off"); $("stt").textContent=on?"Активна":"Не активна";
   const wait=on&&S.tp===1;   // пробный выдан, но человек ещё не подключился: таймер не пошёл
   $("exp").textContent=wait?"с подключения":on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
@@ -440,8 +446,21 @@ $("trial").onclick=doTrial;
 document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>show(b.dataset.open));
 document.querySelectorAll("[data-doc]").forEach(b=>b.onclick=()=>{haptic();const u=b.dataset.doc;try{tg&&tg.openLink?tg.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}});
 
-$("homeLink").onclick=()=>copyText(CONNECT_LINK);
-$("homeLink").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();copyText(CONNECT_LINK)}};
+function homeLinkKind(on){
+  if(!API)return "bot";                       // приложение без связи с ботом: как раньше
+  if(S.sub)return "sub";
+  if(linkState==="wait")return "wait";
+  return on?"dev":"none";
+}
+function homeLinkTap(){
+  const hk=homeLinkKind(eff().on);
+  if(hk==="sub")return copyText(S.sub,"Ссылка скопирована — вставь её в Happ");
+  if(hk==="bot")return copyText(CONNECT_LINK);
+  if(hk==="dev")return addDevice();
+  if(hk==="none"){haptic();$("trial").scrollIntoView({behavior:"smooth",block:"center"})}
+}
+$("homeLink").onclick=homeLinkTap;
+$("homeLink").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();homeLinkTap()}};
 const refLink=()=>$("rlink").textContent;
 $("refLink").onclick=()=>{const t=refLink();if(t!=="—")copyText(t)};
 $("share").onclick=()=>{const t=refLink();if(t==="—")return;
