@@ -196,7 +196,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
 /* ===== НАСТРОЙКИ ===== */
 const BOT="NookenVPN_bot", SUPPORT="Lov1rus", SLOGAN="Быстро. Безопасно. Без границ.";
 const CONNECT_LINK="https://t.me/"+BOT;   // ссылка над кнопкой «Подключиться» (копируется по нажатию), можно заменить на любую
-const DEF_TARIFFS="m1.199.30.0,m3.529.90.10,m6.959.180.18,m12.1699.365.25"; // запасной вариант; бот передаёт свои тарифы
+const DEF_TARIFFS="m1.199.30.0,m3.529.90.11,m6.959.180.20,m12.1699.365.29"; // запасной вариант; бот передаёт свои тарифы
 
 const tg=window.Telegram&&window.Telegram.WebApp, q=new URLSearchParams(location.search);
 const $=id=>document.getElementById(id), n=k=>{const v=parseInt(q.get(k),10);return isNaN(v)?null:v};
@@ -204,7 +204,7 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v11";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v12";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
