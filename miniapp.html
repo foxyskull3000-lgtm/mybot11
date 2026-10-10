@@ -172,12 +172,12 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   <h1>Поддержка</h1>
   <div class="sec">Как подключить</div>
   <div class="glass rows">
-    <div class="row"><span class="ic">1</span><span>Установи приложение: Happ, v2rayTun, Hiddify или v2rayNG</span></div>
-    <div class="row"><span class="ic">2</span><span>Возьми ссылку устройства в разделе «Устройства»</span></div>
-    <div class="row"><span class="ic">3</span><span>Добавь её в приложении из буфера обмена и включи VPN</span></div>
+    <div class="row"><span class="ic">1</span><span>Установи приложение Happ (iPhone, Android, Windows, macOS)</span></div>
+    <div class="row"><span class="ic">2</span><span>Скопируй свою ссылку-подписку на главной или в «Устройства» → «Моя ссылка»</span></div>
+    <div class="row"><span class="ic">3</span><span>В Happ нажми «+» → «Вставить из буфера» и включи VPN. На другом гаджете — та же ссылка, но сначала «Добавить устройство»</span></div>
   </div>
   <button class="btn pri" id="chat">💬 Написать в поддержку</button>
-  <div class="hint">Откроется чат с поддержкой в Telegram</div>
+  <div class="hint">Откроется чат с ботом — напиши вопрос туда</div>
   <div class="sec">📁 Документы</div>
   <div class="glass rows">
     <button class="row" data-doc="https://telegra.ph/POLITIKA-KONFIDENCIALNOSTI-08-12-99"><span class="ic">🔒</span><span>Политика конфиденциальности</span><span class="ch">›</span></button>
@@ -207,7 +207,7 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v14";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v16";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
@@ -386,7 +386,7 @@ async function doTrial(){
       return;
     }
     haptic("medium");
-    openSheet(`<h3>🎁 ${esc(j.title)}</h3>${j.left?`<p>⏳ Осталось: ${esc(j.left)}</p>`:""}<p>Твой ключ (нажми, чтобы скопировать):</p>${linkBox(j.key,"Ключ скопирован")}
+    openSheet(`<h3>🎁 ${esc(j.title)}</h3>${j.left?`<p>⏳ Осталось: ${esc(j.left)}</p>`:""}<p>Твоя ссылка-подписка, одна на все устройства (нажми, чтобы скопировать, и вставь в Happ):</p>${linkBox(j.key,"Ссылка скопирована")}
       <button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>Готово</button>`);
   });
 }
@@ -443,6 +443,7 @@ function render(){
   $("rf").textContent=S.rf; $("rb").textContent=S.rb;
   $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
   const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
+  $("trial").style.display=(S.tr===0||S.ow)?"none":"";   // пробный уже брал или подписка идёт: кнопку прячем
   const nd=Math.max(1,dev||0);
   $("dvn").innerHTML=S.ow?"♾<small>без лимита</small>":(dev===null?"—":nd)+"<small>из "+(max===null?5:max)+"</small>";
   $("dvcost").innerHTML=S.ow?"Ты владелец: устройств сколько угодно":"1 устройство — "+S.mp+" ₽/мес<br>каждое следующее — плюс "+S.ed+" ₽/сутки (≈"+S.me+" ₽/мес)<br><b style='color:#fff'>Сейчас выходит: "+(S.mp+(nd-1)*S.me)+" ₽/мес</b>"+(S.ot?"<br>На пробном периоде — 1 устройство":"");
@@ -463,7 +464,7 @@ $("tariffs").onclick=e=>{const b=e.target.closest(".tf");if(b){sel=b.dataset.k;h
 $("paySbp").onclick=()=>pay("sbp");
 $("payCry").onclick=()=>pay("crypto");
 $("payAmt").onclick=amountSheet;
-$("chat").onclick=()=>openTg("https://t.me/"+SUPPORT);
+$("chat").onclick=()=>go("app_support");   // поддержка внутри бота (а не личка владельца)
 $("addDev").onclick=()=>addDevice(false);
 $("lessDev").onclick=lessDevice;
 $("linksBtn").onclick=showLinks;
@@ -482,7 +483,7 @@ function homeLinkTap(){
   const hk=homeLinkKind(eff().on);
   if(hk==="sub")return copyText(S.sub,"Ссылка скопирована — вставь её в Happ");
   if(hk==="bot")return copyText(CONNECT_LINK);
-  if(hk==="dev")return addDevice();
+  if(hk==="dev")return showLinks();   // ссылка одна: просто показываем её (бот создаст, если ещё нет)
   if(hk==="none"){haptic();$("trial").scrollIntoView({behavior:"smooth",block:"center"})}
 }
 $("homeLink").onclick=homeLinkTap;
