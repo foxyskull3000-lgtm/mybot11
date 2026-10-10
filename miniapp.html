@@ -154,13 +154,15 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
 <section class="tab" id="devs">
   <h1>Устройства</h1>
   <div class="glass card">
-    <div class="k">Занято мест</div><div class="big" id="dvn">—</div>
+    <div class="k">Разрешено устройств</div><div class="big" id="dvn">—</div>
     <div style="color:var(--muted);font-size:15px;line-height:1.7" id="dvcost"></div>
   </div>
-  <div class="sec">Мои устройства</div>
+  <div class="sec">Подключены сейчас</div>
   <div class="glass rows" id="dvlist"></div>
   <button class="btn pri" id="addDev">➕ Добавить устройство</button>
-  <button class="btn out" id="linksBtn">🔑 Ссылки</button>
+  <button class="btn out" id="lessDev">➖ Убрать одно место</button>
+  <button class="btn out" id="linksBtn">🔑 Моя ссылка</button>
+  <div class="hint">Ссылка одна на все устройства: вставь её в Happ на каждом. Новое устройство подключится, только если есть свободное место.</div>
   <button class="btn out" id="helpBtn">📖 Открыть инструкцию</button>
   <div class="hint" id="dvhint">⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны</div>
 </section>
@@ -204,13 +206,13 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v12";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v13";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
 
 /* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={sub:"",mp:199,me:199,mn:50,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
+const S={sub:"",mp:199,me:61,ed:2,mn:50,ow:0,ot:0,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
   dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
 if(S.rb===null)S.rb=S.rf*S.rd;
 const tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
@@ -289,7 +291,7 @@ async function call(action,body){
   }catch(e){linkState="fail";render();return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
 }
 function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de","tp","sub","mp","me","mn","cr"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
+  ["a","ex","d","m","b","rd","rf","rb","tr","dc","de","tp","sub","mp","me","ed","mn","cr","ow","ot"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
   if(Array.isArray(s.dv))S.dv=s.dv;
   render();
 }
@@ -318,8 +320,6 @@ sheet.onclick=e=>{
   if(e.target.closest("[data-help]")){closeSheet();show("help");return}
   if(e.target.closest("[data-close]")){closeSheet();return}
   if(e.target.closest("[data-buy]")){closeSheet();show("home");setTimeout(()=>$("tariffs").scrollIntoView({behavior:"smooth",block:"center"}),80);return}
-  const r2=e.target.closest("[data-rn2]"),d2=e.target.closest("[data-dl2]");
-  if(r2||d2){const d=S.dv.find(v=>v.id===+(r2||d2).dataset[r2?"rn2":"dl2"]);if(d)r2?renameSheet(d):deleteSheet(d);return}
   const f=e.target.closest("[data-do]");if(f&&sheetDo)withBtn(f,sheetDo);
 };
 sheet.onkeydown=e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){const f=sheet.querySelector("[data-do]");if(f)f.click()}};
@@ -337,53 +337,39 @@ async function addDevice(confirmed){confirmed=confirmed===true;
     }
     if(!j.ok)return toast(j.error);
     haptic("medium");
-    openSheet(`<h3>✅ Место для «${esc(j.name)}» готово</h3><p>Подключи устройство по его личной ссылке (нажми на неё, чтобы скопировать):</p>${linkBox(j.link)}
+    openSheet(`<h3>✅ Теперь можно ${esc(j.name)}</h3><p>Вставь ту же ссылку в Happ на новом устройстве (нажми, чтобы скопировать):</p>${linkBox(j.link)}
       <button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>📱 К устройствам</button>`);
+  });
+}
+async function lessDevice(){
+  await withBtn($("lessDev"),async()=>{
+    const j=await act("dev_less");
+    if(!j.ok)return toast(j.error);
+    haptic("medium"); toast("Место убрано, дней стало больше");
   });
 }
 async function showLinks(){
   await withBtn($("linksBtn"),async()=>{
     const j=await act("dev_links");
     if(!j.ok)return toast(j.error);
-    if(!j.links.length)return toast("Устройств пока нет");
-    openSheet(`<h3>🔑 Ссылки устройств</h3><p>Нажми на ссылку, чтобы скопировать:</p>`+
-      j.links.map(l=>`<div class="lk"><b>🐾 ${esc(l.name)}</b>${linkBox(l.link)}</div>`).join("")+
-      `<button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>↩️ К устройствам</button>`);
+    if(!j.links.length)return toast("Ссылка появится после пробного периода или оплаты");
+    openSheet(`<h3>🔑 Твоя ссылка-подписка</h3><p>Одна на все устройства. Нажми, чтобы скопировать, и вставь в Happ:</p>${linkBox(j.links[0].link)}
+      <button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>↩️ К устройствам</button>`);
   });
 }
-function renameSheet(d){
-  openSheet(`<h3>✏️ Новое имя для «${esc(d.name)}»</h3><p>До 20 символов.</p>
-    <input class="inp" id="rnIn" maxlength="20" value="${esc(d.name)}" autocomplete="off" autocapitalize="sentences">
-    <button class="btn pri" data-do>Сохранить</button><button class="btn out" data-close>↩️ Отмена</button>`,
-  async()=>{
-    const j=await act("dev_rename",{id:d.id,name:$("rnIn").value});
-    if(!j.ok)return toast(j.error);
-    closeSheet();toast("Имя изменено");
-  });
-  setTimeout(()=>{const i=$("rnIn");if(i){i.focus();i.select()}},320);
-}
-function deleteSheet(d){
-  openSheet(`<h3>🗑 Удалить «${esc(d.name)}»?</h3><p>Устройство отключится, и место освободится.</p>
-    <button class="btn dang" data-do>✅ Да, удалить</button><button class="btn out" data-close>↩️ Отмена</button>`,
+function unbindSheet(d){
+  openSheet(`<h3>🗑 Отвязать «${esc(d.name)}»?</h3><p>Место освободится, и можно будет подключить другое устройство. Если с этого устройства снова откроют ссылку, оно займёт место заново.</p>
+    <button class="btn dang" data-do>✅ Да, отвязать</button><button class="btn out" data-close>↩️ Отмена</button>`,
   async()=>{
     const j=await act("dev_del",{id:d.id});
     if(!j.ok)return toast(j.error);
-    closeSheet();toast("Устройство удалено");
+    closeSheet();toast("Устройство отвязано");
   });
 }
-async function openDevice(d){
-  const j=await act("dev_links"); if(!j.ok)return toast(j.error);
-  const x=j.links.find(l=>l.id===d.id); if(!x)return;
-  openSheet(`<h3>🐾 ${esc(d.name)}</h3><p>Личная ссылка устройства (нажми на неё, чтобы скопировать):</p>${linkBox(x.link)}
-    <button class="btn pri" data-help>📖 Открыть инструкцию</button>
-    <div class="grid" style="margin-top:10px"><button class="btn out" style="margin:0" data-rn2="${d.id}">✏️ Имя</button><button class="btn dang" style="margin:0" data-dl2="${d.id}">🗑 Удалить</button></div>
-    <button class="btn ghost" style="margin-top:10px" data-close>Закрыть</button>`);
-}
 $("dvlist").onclick=e=>{
-  const r=e.target.closest("[data-rn]"),x=e.target.closest("[data-dl]"),row=e.target.closest(".dev");
-  const id=r?+r.dataset.rn:x?+x.dataset.dl:row?+row.dataset.id:null; if(id===null||isNaN(id))return;
-  const d=S.dv.find(v=>v.id===id); if(!d)return;
-  haptic(); r?renameSheet(d):x?deleteSheet(d):openDevice(d);
+  const x=e.target.closest("[data-dl]"); if(!x)return;
+  const d=S.dv.find(v=>String(v.id)===x.dataset.dl); if(!d)return;
+  haptic(); unbindSheet(d);
 };
 
 /* ===== Пробный период ===== */
@@ -441,7 +427,7 @@ function render(){
   $("st").className="pill"+(on?"":" off"); $("stt").textContent=on?"Активна":"Не активна";
   const wait=on&&S.tp===1, inf=on&&E.ex-now>50*365*86400;   // inf: вечная подписка (владелец)   // пробный выдан, но человек ещё не подключился: таймер не пошёл
   $("exp").textContent=inf?"навсегда ♾":wait?"с подключения":on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
-  const dv=dev===null?"—":max===null?dev:dev+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
+  const dv=S.ow?"без лимита":dev===null?"—":max===null?dev:dev+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
   $("p1").textContent=on?"Активна":"Не активна"; $("p1").className=on?"gr":"";
   $("p2").textContent=inf?"никогда":wait?"после первого подключения":on?dt.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
   $("p3").textContent=inf?"навсегда ♾":wait?"таймер пойдёт с подключения":on?left(E.ex-now):"—"; $("p4").textContent=inf?"не нужен ♾":S.b===null?"—":S.b+" ₽";
@@ -452,13 +438,14 @@ function render(){
   $("rf").textContent=S.rf; $("rb").textContent=S.rb;
   $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
   const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
-  $("dvn").innerHTML=(dev===null?"—":dev)+"<small>из "+(max===null?5:max)+"</small>";
   const nd=Math.max(1,dev||0);
-  $("dvcost").innerHTML="1 устройство — "+S.mp+" ₽/мес<br>каждое следующее — плюс "+S.me+" ₽/мес<br><b style='color:#fff'>Сейчас выходит: "+(S.mp+(nd-1)*S.me)+" ₽/мес</b><br>Больше устройств — дни идут быстрее";
+  $("dvn").innerHTML=S.ow?"♾<small>без лимита</small>":(dev===null?"—":nd)+"<small>из "+(max===null?5:max)+"</small>";
+  $("dvcost").innerHTML=S.ow?"Ты владелец: устройств сколько угодно":"1 устройство — "+S.mp+" ₽/мес<br>каждое следующее — плюс "+S.ed+" ₽/сутки (≈"+S.me+" ₽/мес)<br><b style='color:#fff'>Сейчас выходит: "+(S.mp+(nd-1)*S.me)+" ₽/мес</b>"+(S.ot?"<br>На пробном периоде — 1 устройство":"");
+  $("addDev").style.display=S.ow?"none":""; $("lessDev").style.display=(S.ow||nd<=1)?"none":"";
   /* надпись про связь с ботом показываем только когда что-то не так */
   $("dvhint").textContent=({none:"⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны",fail:"⚠️ Сервер бота недоступен: данные могут быть старыми"})[linkState]||"";
   $("dvhint").style.display=(linkState==="none"||linkState==="fail")?"":"none";
-  $("dvlist").innerHTML=S.dv.length?S.dv.map(d=>`<div class="dev" data-id="${d.id}"><span class="ic">🐾</span><div class="nm">${esc(d.name)}<em>${d.on?"подключено":"не подключено"}</em></div>${d.id!==null?`<button class="rb" data-rn="${d.id}" aria-label="Переименовать">✏️</button><button class="rb" data-dl="${d.id}" aria-label="Удалить">🗑</button>`:""}</div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного устройства</em></span></div>';
+  $("dvlist").innerHTML=S.dv.length?S.dv.map(d=>`<div class="dev"><span class="ic">📱</span><div class="nm">${esc(d.name)}<em>подключено</em></div>${d.id?`<button class="rb" data-dl="${esc(d.id)}" aria-label="Отвязать">🗑</button>`:""}</div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного. Вставь ссылку в Happ — устройство появится здесь само</em></span></div>';
 }
 function drawTariffs(){
   $("tariffs").innerHTML=tariffs.map(t=>{const m=Math.max(1,Math.floor(t.days/30));
@@ -473,6 +460,7 @@ $("payCry").onclick=()=>pay("crypto");
 $("payAmt").onclick=amountSheet;
 $("chat").onclick=()=>openTg("https://t.me/"+SUPPORT);
 $("addDev").onclick=()=>addDevice(false);
+$("lessDev").onclick=lessDevice;
 $("linksBtn").onclick=showLinks;
 $("helpBtn").onclick=()=>show("help");
 $("trial").onclick=doTrial;
