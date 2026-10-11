@@ -207,7 +207,7 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v16";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v17";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
@@ -451,7 +451,8 @@ function render(){
   /* надпись про связь с ботом показываем только когда что-то не так */
   $("dvhint").textContent=({none:"⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны",fail:"⚠️ Сервер бота недоступен: данные могут быть старыми"})[linkState]||"";
   $("dvhint").style.display=(linkState==="none"||linkState==="fail")?"":"none";
-  $("dvlist").innerHTML=S.dv.length?S.dv.map(d=>`<div class="dev"><span class="ic">📱</span><div class="nm">${esc(d.name)}<em>подключено</em></div>${d.id?`<button class="rb" data-dl="${esc(d.id)}" aria-label="Отвязать">🗑</button>`:""}</div>`).join(""):'<div class="row"><span class="ic">📱</span><span><em>Пока ни одного. Вставь ссылку в Happ — устройство появится здесь само</em></span></div>';
+  $("dvlist").innerHTML=S.dv.length?S.dv.map(d=>`<div class="dev"><span class="ic">📱</span><div class="nm">${esc(d.name)}<em>подключено</em></div>${d.id?`<button class="rb" data-dl="${esc(d.id)}" aria-label="Отвязать">🗑</button>`:""}</div>`).join(""):'';
+  $("dvlist").style.display=S.dv.length?"":"none"; $("dvlist").previousElementSibling.style.display=S.dv.length?"":"none";
 }
 function drawTariffs(){
   $("tariffs").innerHTML=tariffs.map(t=>{const m=Math.max(1,Math.floor(t.days/30));
