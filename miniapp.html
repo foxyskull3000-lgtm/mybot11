@@ -208,13 +208,13 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v21";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v22";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
 
 /* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={sub:"",mp:149,me:30,ed:1,mn:50,ow:0,ot:0,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??3,rf:n("rf")||0,rb:n("rb"),rp:n("rp")??20,tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
+const S={sub:"",mp:149,me:30,ed:1,mn:50,ow:0,ot:0,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??0,rf:n("rf")||0,rb:n("rb"),rp:n("rp")??20,tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
   dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
 if(S.rb===null)S.rb=0;
 let tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
@@ -448,7 +448,7 @@ function render(){
   const nm=tu.first_name||"Профиль"; $("pn").textContent=nm; $("av").textContent=nm[0].toUpperCase();
   $("pu").textContent=tu.username?"@"+tu.username:"";
   $("rbig").innerHTML=(S.rp||20)+"%<small>тебе на баланс</small>";
-  $("rsub").textContent="Деньги сами превращаются в дни подписки. Другу — "+S.rd+" "+pl(S.rd,"день","дня","дней")+" бесплатно";
+  $("rsub").textContent="Деньги сами превращаются в дни подписки"+(S.rd>0?". Другу — "+S.rd+" "+pl(S.rd,"день","дня","дней")+" бесплатно":"");
   $("rf").textContent=S.rf; $("rb").textContent=S.rb;
   $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
   const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
@@ -501,7 +501,7 @@ $("homeLink").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();
 const refLink=()=>$("rlink").textContent;
 $("refLink").onclick=()=>{const t=refLink();if(t!=="—")copyText(t)};
 $("share").onclick=()=>{const t=refLink();if(t==="—")return;
-  openTg("https://t.me/share/url?url="+encodeURIComponent(t)+"&text="+encodeURIComponent("Подключайся к NookenVPN по моей ссылке и получи "+S.rd+" "+pl(S.rd,"день","дня","дней")+" бесплатно! 🎁"))};
+  openTg("https://t.me/share/url?url="+encodeURIComponent(t)+"&text="+encodeURIComponent("Подключайся к NookenVPN по моей ссылке"+(S.rd>0?" и получи "+S.rd+" "+pl(S.rd,"день","дня","дней")+" бесплатно! 🎁":" — есть бесплатный пробный период 🎁")))};
 
 function show(tab){
   closeSheet();
