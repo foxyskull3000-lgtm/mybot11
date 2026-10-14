@@ -208,7 +208,7 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v19";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v20";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
@@ -392,28 +392,36 @@ async function doTrial(){
   });
 }
 
-/* ===== Оплата: как в боте, способы пока заглушки ===== */
-/* Крипта: бот создаёт счёт в CryptoBot (в рублях, курс считает CryptoBot) и сразу открываем чек */
-async function payCrypto(body,btn){
+/* ===== Оплата ===== */
+/* СБП: бот создаёт платёж в RollyPay, открываем страницу оплаты (выбор банка / QR).
+   Крипта: бот создаёт счёт в CryptoBot (в рублях, курс считает CryptoBot) и сразу открываем чек */
+const openExt=u=>{haptic();try{tg&&tg.openLink?tg.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}};
+async function payGo(method,body,btn){
   if(!API)return toast("Оплата доступна при открытии приложения из бота");
   await withBtn(btn,async()=>{
-    const j=await act("pay",Object.assign({method:"crypto"},body));
+    const j=await act("pay",Object.assign({method},body));
     if(!j.ok)return toast(j.error);
-    haptic("medium"); toast("Открываю CryptoBot…"); openTg(j.url);
+    haptic("medium");
+    if(method==="sbp"){toast("Открываю оплату по СБП…");openExt(j.url)}
+    else{toast("Открываю CryptoBot…");openTg(j.url)}
   });
 }
-const pay=m=>m==="crypto"?payCrypto({tariff:sel},$("payCry")):toast("Оплата через СБП скоро будет доступна, пока можно криптой 💎");
+const payCrypto=(body,btn)=>payGo("crypto",body,btn);
+const pay=m=>payGo(m,{tariff:sel},$(m==="sbp"?"paySbp":"payCry"));
 function amountSheet(){
   const mn=S.mn||50;
   openSheet(`<h3>💰 Пополнение</h3><p>Любая сумма от ${mn} ₽. Деньги превращаются в дни по цене твоих устройств.<br><i>Бонусы есть только у тарифов на 3, 6 и 12 месяцев.</i></p>
     <input class="inp" id="amIn" type="number" inputmode="numeric" min="${mn}" placeholder="Например, 300">
     <div class="hint" id="amDays" style="margin:10px 0 0"></div>
-    <button class="btn cry" data-do>💎 Оплатить криптой</button><button class="btn out" data-close>Отмена</button>`,
+    <button class="btn pri" data-do>🏦 Оплатить через СБП</button><button class="btn cry" id="amCry">💎 Оплатить криптой</button><button class="btn out" data-close>Отмена</button>`,
   async()=>{
     const v=parseInt($("amIn").value,10);
     if(!(v>=mn))return toast("Минимум "+mn+" ₽");
-    closeSheet(); busy=false; await payCrypto({amount:v},$("payAmt"));
+    closeSheet(); busy=false; await payGo("sbp",{amount:v},$("payAmt"));
   });
+  $("amCry").onclick=async e=>{e.stopPropagation();const v=parseInt($("amIn").value,10);
+    if(!(v>=mn))return toast("Минимум "+mn+" ₽");
+    closeSheet(); busy=false; await payGo("crypto",{amount:v},$("payAmt"));};
   const i=$("amIn"); i.oninput=()=>{const v=parseInt(i.value,10),n=Math.max(1,S.d||0),mc=S.mp+(n-1)*S.me;
     $("amDays").textContent=v>0?("≈ "+Math.floor(v/(mc*12/365))+" "+pl(Math.floor(v/(mc*12/365)),"день","дня","дней")+" при "+n+" устр."):""};
   setTimeout(()=>i.focus(),320);
