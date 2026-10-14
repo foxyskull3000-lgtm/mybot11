@@ -32,6 +32,7 @@ h1{font:800 32px var(--num);margin:6px 2px 0}
 .slogan{font:800 20px/1.25 var(--num);margin:4px 0 0}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
 .mini{padding:14px;border-radius:20px;background:var(--glass);border:1px solid var(--stroke)}
+.mh{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.25}.mh:empty{display:none}
 .k{font:700 11.5px var(--num);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .v{font:700 20px var(--num);margin-top:8px}
 .sec{display:flex;align-items:center;gap:10px;font:700 12.5px var(--num);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:8px 2px 0}
@@ -67,7 +68,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
 .rows{padding:6px 18px}.row{display:flex;align-items:center;gap:14px;padding:14px 0;font-size:17px;font-weight:600;width:100%;background:none;text-align:left}
 .row+.row{border-top:1px solid var(--stroke)}
 .ic{width:46px;height:46px;border-radius:14px;background:rgba(255,154,26,.12);border:1px solid rgba(255,154,26,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
-.row em{font-style:normal;color:var(--muted);font-weight:600}.row .gr{color:#6ff0b4}.row .or{color:var(--orange-2)}.row .ch{margin-left:auto;color:var(--muted)}
+.row em{font-style:normal;color:var(--muted);font-weight:600}.row .gr{color:#6ff0b4}.row .rd{color:#ff7a5a}.row .or{color:var(--orange-2)}.row .ch{margin-left:auto;color:var(--muted)}
 .dev{display:flex;align-items:center;gap:12px;padding:12px 0;font-size:17px;font-weight:700}
 .dev{cursor:pointer}.dev+.dev{border-top:1px solid var(--stroke)}
 .dev .nm{flex:1;min-width:0;overflow-wrap:anywhere}.dev .nm em{display:block;font-style:normal;color:var(--muted);font-weight:600;font-size:14px;margin-top:2px}
@@ -99,7 +100,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   <div class="glass card">
     <div class="top"><h2 class="slogan" id="slogan"></h2><div class="pill" id="st"><span class="dot"></span><span id="stt">—</span></div></div>
     <div class="two">
-      <div class="mini"><div class="k">Истекает</div><div class="v" id="exp">—</div></div>
+      <div class="mini"><div class="k" id="expK">Истекает</div><div class="v" id="exp">—</div><div class="mh" id="expH"></div></div>
       <div class="mini"><div class="k">Устройства</div><div class="v" id="dev">—</div></div>
     </div>
     <div class="k" id="hlabel" style="margin:0 2px 8px">Твоя ссылка-подписка</div>
@@ -208,7 +209,7 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v22";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v24";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
@@ -293,7 +294,7 @@ async function call(action,body){
   }catch(e){linkState="fail";render();return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
 }
 function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","rp","sb","tr","dc","de","tp","sub","mp","me","ed","mn","cr","ow","ot"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
+  ["a","ex","d","m","b","rd","rf","rb","rp","sb","td","tr","dc","de","tp","sub","mp","me","ed","mn","cr","ow","ot"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
   if(Array.isArray(s.dv))S.dv=s.dv;
   S.tb=s.tb; S.ds=s.ds||0;
   if(s.tf){tariffs=s.tf.split(",").map(x=>{const[k,p,d,y]=x.split(".");return{k,price:+p,days:+d,disc:+y}});drawTariffs()}
@@ -436,15 +437,23 @@ function render(){
   $("hlabel").textContent=hk==="sub"?"Твоя ссылка-подписка":hk==="bot"?"Бот":"Подключение";
   $("hlink").textContent=hk==="sub"?S.sub:hk==="bot"?CONNECT_LINK:hk==="dev"?"Нажми, чтобы получить ссылку для устройства":hk==="wait"?"Загружаю ссылку…":"Возьми пробный период или оплати тариф — ссылка появится здесь";
   $("hcp").textContent=(hk==="sub"||hk==="bot")?"⧉":"›";
-  $("st").className="pill"+(on?"":" off"); $("stt").textContent=on?"Активна":"Не активна";
-  const wait=on&&S.tp===1, inf=on&&E.ex-now>50*365*86400;   // inf: вечная подписка (владелец)   // пробный выдан, но человек ещё не подключился: таймер не пошёл
-  $("exp").textContent=inf?"навсегда ♾":wait?"с подключения":on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
-  const dv=S.ow?"без лимита":dev===null?"—":max===null?dev:dev+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
-  $("p1").textContent=on?"Активна":"Не активна"; $("p1").className=on?"gr":"";
+  const wait=on&&S.tp===1, inf=on&&E.ex-now>50*365*86400;
+  /* статус: зелёный «Активна» — только когда реально подключён хотя бы один девайс;
+     подписка есть, но ни одного подключения (в т.ч. пробный ещё не начат) — красный «Не подключён» */
+  const conn=Array.isArray(S.dv)?S.dv.length:0, noConn=on&&!inf&&!S.ow&&(wait||(API&&conn===0));
+  const stTxt=!on?"Не активна":noConn?"Не подключён":"Активна";
+  $("st").className="pill"+(on&&!noConn?"":" off"); $("stt").textContent=stTxt;
+  const th=Math.round((S.td||1)*24), thTxt=th%24===0&&th>24?(th/24)+" "+pl(th/24,"день","дня","дней"):th+" "+pl(th,"час","часа","часов");   // inf: вечная подписка (владелец)   // пробный выдан, но человек ещё не подключился: таймер не пошёл
+  $("expK").textContent=wait?"Пробный период":"Истекает";
+  $("exp").textContent=inf?"навсегда ♾":wait?thTxt:on?dt.toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—";
+  $("expH").textContent=wait?"старт с подключения":"";
+  /* устройства: сколько реально подключено из максимума на аккаунт (5) */
+  const dv=S.ow?"без лимита":max===null?"—":(API?conn:(dev||0))+" из "+max; $("dev").textContent=dv; $("p5").textContent=dv;
+  $("p1").textContent=stTxt; $("p1").className=on&&!noConn?"gr":"rd";
   const tb=S.tb; $("p6").textContent=tb==null?"—":tb>=1073741824?(tb/1073741824).toFixed(1).replace(".",",")+" ГБ":Math.round(tb/1048576)+" МБ";
   $("payHint").textContent=S.ds?("🎁 Твоя скидка −"+S.ds+"% уже в ценах"):"СБП — любой банк · крипта через CryptoBot (USDT)";
   $("p2").textContent=inf?"никогда":wait?"после первого подключения":on?dt.toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"—";
-  $("p3").textContent=inf?"навсегда ♾":wait?"таймер пойдёт с подключения":on?left(E.ex-now):"—"; $("p4").textContent=inf?"не нужен ♾":S.b===null?"—":S.b+" ₽";
+  $("p3").textContent=inf?"навсегда ♾":wait?thTxt+" · старт с подключения":on?left(E.ex-now):"—"; $("p4").textContent=inf?"не нужен ♾":S.b===null?"—":S.b+" ₽";
   const nm=tu.first_name||"Профиль"; $("pn").textContent=nm; $("av").textContent=nm[0].toUpperCase();
   $("pu").textContent=tu.username?"@"+tu.username:"";
   $("rbig").innerHTML=(S.rp||20)+"%<small>тебе на баланс</small>";
