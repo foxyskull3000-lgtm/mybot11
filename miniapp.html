@@ -112,6 +112,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
   <button class="btn pri" id="paySbp"></button>
   <button class="btn cry" id="payCry">💎 Оплатить криптой (USDT)</button>
   <button class="btn out" id="payAmt">💰 Пополнить на свою сумму</button>
+  <button class="btn out" id="promoBtn">🎟 Ввести промокод</button>
   <div class="hint" id="payHint">Счёт в рублях — CryptoBot сам пересчитает в USDT по курсу</div>
   <button class="btn ghost" id="trial"></button>
   <div class="sec">📁 Документы</div>
@@ -209,7 +210,7 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v26";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v27";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
@@ -428,6 +429,25 @@ function amountSheet(){
   setTimeout(()=>i.focus(),320);
 }
 
+function promoSheet(){
+  openSheet(`<h3>🎟 Промокод</h3><p>Введи промокод — скидка, дни или деньги на баланс применятся сразу.</p>
+    <input class="inp" id="pmIn" type="text" autocapitalize="characters" autocomplete="off" maxlength="20" placeholder="Например, NOOKEN30">
+    <button class="btn pri" data-do>✅ Применить</button><button class="btn out" data-close>Отмена</button>`,
+  async()=>{
+    const v=($("pmIn").value||"").trim();
+    if(!v)return toast("Введи промокод");
+    closeSheet(); busy=false;
+    await withBtn($("promoBtn"),async()=>{
+      const j=await act("promo",{code:v});
+      if(!j.ok)return toast(j.error||"Не получилось");
+      haptic("medium");
+      openSheet(`<h3>${esc(j.title||"✅ Промокод применён")}</h3><p style="white-space:pre-line">${esc(j.text||"")}</p>
+        <button class="btn pri" data-close>👌 Отлично</button>`);
+    });
+  });
+  setTimeout(()=>$("pmIn").focus(),320);
+}
+
 /* ===== Отрисовка ===== */
 function render(){
   const now=Date.now()/1000, E=eff(), on=E.on, dt=new Date(E.ex*1000), dev=S.d, max=S.m;
@@ -484,6 +504,7 @@ $("tariffs").onclick=e=>{const b=e.target.closest(".tf");if(b){sel=b.dataset.k;h
 $("paySbp").onclick=()=>pay("sbp");
 $("payCry").onclick=()=>pay("crypto");
 $("payAmt").onclick=amountSheet;
+$("promoBtn").onclick=promoSheet;
 $("chat").onclick=()=>go("app_support");   // поддержка внутри бота (а не личка владельца)
 $("addDev").onclick=()=>addDevice(false);
 $("lessDev").onclick=lessDevice;
