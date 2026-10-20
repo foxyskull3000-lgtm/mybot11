@@ -105,6 +105,11 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
     </div>
     <div class="k" id="hlabel" style="margin:0 2px 8px">Твоя ссылка-подписка</div>
     <div class="link tap" id="homeLink" role="button" tabindex="0" aria-label="Скопировать ссылку"><span id="hlink"></span><button class="cp" id="hcp" tabindex="-1" aria-hidden="true">⧉</button></div>
+    <div class="hint" id="lwarn" style="display:none;text-align:left;margin:-2px 2px 10px;white-space:pre-line"></div>
+    <div id="lbtns" style="display:none">
+      <button class="btn pri" id="happBtn">📲 Открыть в Happ</button>
+      <button class="btn out" id="resetBtn">🔑 Сбросить устройства</button>
+    </div>
     <button class="btn pri" data-open="devs">📱 Управлять устройствами</button>
   </div>
   <div class="sec">Тариф</div>
@@ -202,7 +207,7 @@ button{font-family:var(--ui);color:inherit;border:0;cursor:pointer;transition:tr
 /* ===== НАСТРОЙКИ ===== */
 const BOT="NookenVPN_bot", SUPPORT="Lov1rus", SLOGAN="Быстро. Безопасно. Без границ.";
 const CONNECT_LINK="https://t.me/"+BOT;   // ссылка над кнопкой «Подключиться» (копируется по нажатию), можно заменить на любую
-const DEF_TARIFFS="m1.149.30.0,m3.399.90.11,m6.749.180.16,m12.1290.365.28"; // запасной вариант; бот передаёт свои тарифы
+const DEF_TARIFFS="m1.129.30.0,m3.345.90.11,m6.649.180.16,m12.1119.365.28"; // запасной вариант; бот передаёт свои тарифы
 
 const tg=window.Telegram&&window.Telegram.WebApp, q=new URLSearchParams(location.search);
 const $=id=>document.getElementById(id), n=k=>{const v=parseInt(q.get(k),10);return isNaN(v)?null:v};
@@ -210,13 +215,13 @@ const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
 const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v27";                                  // версия страницы (видна внизу вкладки «Устройства»)
+const APP_V="v28";                                  // версия страницы (видна внизу вкладки «Устройства»)
 let linkState=API?"wait":"none";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
 const uid=n("u")||tu.id||0;
 
 /* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={sub:"",mp:149,me:30,ed:1,mn:50,ow:0,ot:0,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??0,rf:n("rf")||0,rb:n("rb"),rp:n("rp")??20,tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
+const S={sub:"",bd:1,hp:"",rs:0,lw:"",mp:129,me:30,ed:1,mn:50,ow:0,ot:0,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??0,rf:n("rf")||0,rb:n("rb"),rp:n("rp")??20,tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
   dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
 if(S.rb===null)S.rb=0;
 let tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
@@ -295,7 +300,7 @@ async function call(action,body){
   }catch(e){linkState="fail";render();return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
 }
 function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","rp","sb","td","tl","tr","dc","de","tp","sub","mp","me","ed","mn","cr","ow","ot"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
+  ["a","ex","d","m","b","rd","rf","rb","rp","sb","td","tl","tr","dc","de","tp","sub","mp","me","ed","mn","cr","ow","ot","bd","hp","rs","lw"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
   if(Array.isArray(s.dv))S.dv=s.dv;
   S.tb=s.tb; S.ds=s.ds||0;
   if(s.tf){tariffs=s.tf.split(",").map(x=>{const[k,p,d,y]=x.split(".");return{k,price:+p,days:+d,disc:+y}});drawTariffs()}
@@ -360,7 +365,12 @@ async function showLinks(){
     if(!j.ok)return toast(j.error);
     if(!j.links.length)return toast("Ссылка появится после пробного периода или оплаты");
     openSheet(`<h3>🔑 Твоя ссылка-подписка</h3><p>Одна на все устройства. Нажми, чтобы скопировать, и вставь в Happ:</p>${linkBox(j.links[0].link)}
-      <button class="btn pri" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>↩️ К устройствам</button>`);
+      ${S.lw&&!S.ow?`<p style="white-space:pre-line;font-size:14px">${esc(S.lw)}</p>`:""}
+      ${S.hp?`<button class="btn pri" id="shHapp">📲 Открыть в Happ</button>`:""}
+      ${S.ow?"":`<button class="btn out" id="shReset">🔑 Сбросить устройства</button>`}
+      <button class="btn out" data-help>📖 Открыть инструкцию</button><button class="btn out" data-close>↩️ К устройствам</button>`);
+    if($("shHapp"))$("shHapp").onclick=e=>{e.stopPropagation();openExt(S.hp)};
+    if($("shReset"))$("shReset").onclick=e=>{e.stopPropagation();closeSheet();resetSheet()};
   });
 }
 function unbindSheet(d){
@@ -424,7 +434,7 @@ function amountSheet(){
   $("amCry").onclick=async e=>{e.stopPropagation();const v=parseInt($("amIn").value,10);
     if(!(v>=mn))return toast("Минимум "+mn+" ₽");
     closeSheet(); busy=false; await payGo("crypto",{amount:v},$("payAmt"));};
-  const i=$("amIn"); i.oninput=()=>{const v=parseInt(i.value,10),n=Math.max(1,S.d||0),mc=S.mp+(n-1)*S.me;
+  const i=$("amIn"); i.oninput=()=>{const v=parseInt(i.value,10),n=Math.max(1,S.bd||S.d||0),mc=S.mp+(n-1)*S.me;
     $("amDays").textContent=v>0?("≈ "+Math.floor(v/(mc*12/365))+" "+pl(Math.floor(v/(mc*12/365)),"день","дня","дней")+" при "+n+" устр."):""};
   setTimeout(()=>i.focus(),320);
 }
@@ -448,6 +458,20 @@ function promoSheet(){
   setTimeout(()=>$("pmIn").focus(),320);
 }
 
+function resetSheet(){
+  if(S.rs>0){const h=Math.max(1,Math.round(S.rs/3600));return toast("Сбрасывать можно раз в сутки. Через ~"+h+" ч.")}
+  openSheet(`<h3>🔑 Сбросить устройства?</h3><p>Все подключённые устройства отключатся, место освободится. Потом открой Happ и нажми 🔄 у подписки NookenVPN (или добавь ссылку заново).<br><i>Сбрасывать можно раз в сутки.</i></p>
+    <button class="btn dang" data-do>✅ Да, сбросить</button><button class="btn out" data-close>↩️ Отмена</button>`,
+  async()=>{
+    closeSheet(); busy=false;
+    await withBtn($("resetBtn"),async()=>{
+      const j=await act("self_reset");
+      if(!j.ok)return toast(j.error||"Не получилось");
+      haptic("medium"); toast("Устройства сброшены. Открой Happ и нажми 🔄");
+    });
+  });
+}
+
 /* ===== Отрисовка ===== */
 function render(){
   const now=Date.now()/1000, E=eff(), on=E.on, dt=new Date(E.ex*1000), dev=S.d, max=S.m;
@@ -457,6 +481,8 @@ function render(){
   $("hlabel").textContent=hk==="sub"?"Твоя ссылка-подписка":hk==="bot"?"Бот":"Подключение";
   $("hlink").textContent=hk==="sub"?S.sub:hk==="bot"?CONNECT_LINK:hk==="dev"?"Нажми, чтобы получить ссылку для устройства":hk==="wait"?"Загружаю ссылку…":"Возьми пробный период или оплати тариф — ссылка появится здесь";
   $("hcp").textContent=(hk==="sub"||hk==="bot")?"⧉":"›";
+  const showL=hk==="sub"&&!S.ow; $("lwarn").style.display=showL&&S.lw?"":"none"; $("lwarn").textContent=S.lw||"";
+  $("lbtns").style.display=showL?"":"none"; $("happBtn").style.display=S.hp?"":"none";
   const wait=on&&S.tp===1, inf=on&&E.ex-now>50*365*86400;
   /* статус: зелёный «Активна» — только когда реально подключён хотя бы один девайс;
      подписка есть, но ни одного подключения (в т.ч. пробный ещё не начат) — красный «Не подключён» */
@@ -483,9 +509,9 @@ function render(){
   $("rlink").textContent=uid?"https://t.me/"+BOT+"?start=ref_"+uid:"—";
   const h=(S.tr||1)*24; $("trial").textContent="Попробовать "+h+" "+pl(h,"час","часа","часов")+" бесплатно";
   $("trial").style.display=(S.tr===0||S.ow)?"none":"";   // пробный уже брал или подписка идёт: кнопку прячем
-  const nd=Math.max(1,dev||0);
+  const nd=Math.max(1,dev||0), nb=Math.max(1,Math.min(S.bd||1,nd));
   $("dvn").innerHTML=S.ow?"♾<small>без лимита</small>":(dev===null?"—":nd)+"<small>из "+(max===null?5:max)+"</small>";
-  $("dvcost").innerHTML=S.ow?"Ты владелец: устройств сколько угодно":"1 устройство — "+S.mp+" ₽/мес<br>каждое следующее — плюс "+S.ed+" ₽/сутки (≈"+S.me+" ₽/мес)<br><b style='color:#fff'>Сейчас выходит: "+(S.mp+(nd-1)*S.me)+" ₽/мес</b>"+(S.ot?"<br>На пробном периоде — 1 устройство":"");
+  $("dvcost").innerHTML=S.ow?"Ты владелец: устройств сколько угодно":"1 устройство — "+S.mp+" ₽/мес<br>каждое следующее — плюс "+S.ed+" ₽/сутки (≈"+S.me+" ₽/мес)<br><b style='color:#fff'>Сейчас выходит: "+(S.mp+(nb-1)*S.me)+" ₽/мес</b>"+(nd>nb?"<br>Списываем за подключённые: "+nb+" из "+nd+". Новое место платное, только когда устройство подключится":"")+(S.ot?"<br>На пробном периоде — 1 устройство":"");
   $("addDev").style.display=S.ow?"none":""; $("lessDev").style.display=(S.ow||nd<=1)?"none":"";
   /* надпись про связь с ботом показываем только когда что-то не так */
   $("dvhint").textContent=({none:"⚠️ Нет связи с ботом: устройства хранятся только в этом приложении и в боте не видны",fail:"⚠️ Сервер бота недоступен: данные могут быть старыми"})[linkState]||"";
@@ -505,6 +531,8 @@ $("paySbp").onclick=()=>pay("sbp");
 $("payCry").onclick=()=>pay("crypto");
 $("payAmt").onclick=amountSheet;
 $("promoBtn").onclick=promoSheet;
+$("happBtn").onclick=()=>{if(S.hp)openExt(S.hp)};
+$("resetBtn").onclick=resetSheet;
 $("chat").onclick=()=>go("app_support");   // поддержка внутри бота (а не личка владельца)
 $("addDev").onclick=()=>addDevice(false);
 $("lessDev").onclick=lessDevice;
