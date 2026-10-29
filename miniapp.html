@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;800&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://telegram.org; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src https://api.94-156-237-24.sslip.io; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 :root{--orange:#ff9a1a;--orange-2:#ffb347;--glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.10);--stroke:rgba(255,255,255,.14);--muted:rgba(255,255,255,.70);--cyan:rgba(80,200,220,.35);--num:"Montserrat",-apple-system,"Segoe UI",Roboto,sans-serif;--ui:"Nunito",-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -214,21 +215,29 @@ const $=id=>document.getElementById(id), n=k=>{const v=parseInt(q.get(k),10);ret
 const pl=(x,a,b,c)=>{const t=Math.abs(x)%100,u=t%10;return t>10&&t<20?c:u>1&&u<5?b:u===1?a:c};
 try{if(tg){tg.ready();tg.expand();tg.setHeaderColor&&tg.setHeaderColor("#0F1620");tg.setBackgroundColor&&tg.setBackgroundColor("#0F1620");tg.disableVerticalSwipes&&tg.disableVerticalSwipes()}}catch(e){}
 const tu=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
-const API=(q.get("api")||"").replace(/\/+$/,"");   // адрес API бота; пустой — приложение работает отдельно от бота
-const APP_V="v29";                                  // версия страницы (видна внизу вкладки «Устройства»)
-let linkState=API?"wait":"none";
+const API="https://api.94-156-237-24.sslip.io";   // адрес API бота — только константой (не из адреса страницы)
+const APP_V="v30";                                  // версия страницы (видна внизу вкладки «Устройства»)
+let linkState="wait";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
-const uid=n("u")||tu.id||0;
+const uid=tu.id||n("u")||0;
 
 /* Данные: сначала из адреса (мгновенно), потом свежие с сервера бота */
-const S={sub:"",bd:1,hp:"",rs:0,lw:"",mp:129,me:30,ed:1,mn:50,ow:0,ot:0,tp:n("tp")||0,a:n("a"),ex:n("ex")||0,d:n("d"),m:n("m"),b:n("b"),rd:n("rd")??0,rf:n("rf")||0,rb:n("rb"),rp:n("rp")??20,tr:n("tr"),dc:n("dc")??3,de:n("de")??1,
-  dv:(()=>{try{return JSON.parse(q.get("dv")||"[]").map(d=>({id:null,name:d[0],on:d[1]}))}catch(e){return[]}})()};
+/* Все данные — только с сервера бота (по подписи Telegram). До ответа — пустые значения */
+const S={sub:"",bd:1,hp:"",rs:0,lw:"",mp:129,me:30,ed:1,mn:50,ow:0,ot:0,tp:0,a:null,ex:0,d:null,m:null,b:null,rd:0,rf:0,rb:0,rp:20,tr:0,dc:4.24,de:1,dv:[]};
 if(S.rb===null)S.rb=0;
-let tariffs=(q.get("tf")||DEF_TARIFFS).split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:+p,days:+d,disc:+x}});
+const TF_KEYS=["m1","m3","m6","m12"];
+const num=(v,d=0)=>{const x=Number(v);return Number.isFinite(x)?x:d};
+const parseTf=str=>String(str||"").split(",").map(s=>{const[k,p,d,x]=s.split(".");return{k,price:num(p),days:num(d),disc:num(x)}})
+  .filter(t=>TF_KEYS.includes(t.k)&&t.price>0&&t.days>0);
+let tariffs=parseTf(DEF_TARIFFS);
 let sel=(tariffs.find(t=>t.k==="m3")||tariffs[0]).k;
 
 const haptic=t=>{try{tg&&tg.HapticFeedback&&tg.HapticFeedback.impactOccurred(t||"light")}catch(e){}};
-const openTg=u=>{haptic();tg&&tg.openTelegramLink?tg.openTelegramLink(u):window.open(u,"_blank")};
+const safeUrl=(u,hosts)=>{try{const x=new URL(String(u));if(x.protocol!=="https:")return null;
+  if(hosts&&!hosts.some(h=>x.hostname===h||x.hostname.endsWith("."+h)))return null;return x.href}catch(e){return null}};
+const winOpen=u=>{const w=window.open(u,"_blank","noopener,noreferrer");if(w)w.opener=null};
+const openTg=u=>{const s=safeUrl(u,["t.me"]);if(!s)return toast("Ссылка заблокирована");haptic();
+  tg&&tg.openTelegramLink?tg.openTelegramLink(s):winOpen(s)};
 const go=a=>openTg("https://t.me/"+BOT+"?start="+a);
 let tt;const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),t.length>40?3200:1800)};
 const left=s=>{const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);
@@ -236,57 +245,10 @@ const left=s=>{const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.flo
   if(h)return h+" "+pl(h,"час","часа","часов")+(m?" "+m+" мин.":"");
   return Math.max(1,m)+" мин."};
 
-/* ===== Автономный режим: пока нет сервера, устройства и пробный период живут в самом приложении ===== */
-const NAMES=["Барсик","Мурзик","Пушок","Снежок","Рыжик","Тигра","Симба","Мурка","Багира","Пуся","Персик","Дымок","Лаки","Пирожок","Зефир","Клёпа","Шустрик","Соня","Бусинка","Вафля","Конфета","Ириска","Тоша","Марсик","Кекс","Гоша","Булочка","Компот","Пончик","Маршмеллоу","Ушастик","Хвостик","Лапуля","Мотя","Нюша","Луна","Ясик","Фиса","Масяня","Бегемот","Космос","Шерлок","Оскар","Рафаэлло","Сметанка","Сосиска","Тапочек","Цветик","Чижик","Уголёк","Мандарин","Карамелька","Бублик","Крошка","Милка","Пират","Граф","Мурлыка","Звёздочка","Хлопушка","Снежинка","Ватрушка","Пряник","Сфинкс","Эльф","Дюшес","Кузя","Тимошка","Шоколадка","Лисёнок","Бантик","Васька","Котлета","Облачко","Пампушка","Рыжуля","Фасолька","Сахарок","Тучка","Яшка"];
-const makeLink=()=>CONNECT_LINK;   // ссылка, которую выдаём устройству и пробному периоду. Позже сюда встанет выдача vless
-const LS="nk_"+uid;
-let L=(()=>{try{return JSON.parse(localStorage.getItem(LS)||"{}")||{}}catch(e){return{}}})();
-const lsSave=()=>{try{localStorage.setItem(LS,JSON.stringify(L))}catch(e){}};
-function syncLocal(){
-  if(API)return;
-  if(!Array.isArray(L.devs)){L.devs=S.dv.map((d,i)=>({id:i+1,name:d.name,link:makeLink(),on:d.on?1:0}));L.nid=L.devs.length+1;L.used=L.devs.map(d=>d.name);lsSave()}
-  S.dv=L.devs;S.d=L.devs.length;if(S.m===null)S.m=5;
-}
-function eff(){const now=Date.now()/1000;let ex=S.a===1?S.ex:0;if(L.trialUntil>ex)ex=L.trialUntil;return{on:ex>now,ex}}
-function kitten(){
-  const used=new Set((L.used||[]).concat(L.devs.map(d=>d.name)).map(s=>s.toLowerCase()));
-  const fresh=NAMES.filter(x=>!used.has(x.toLowerCase()));
-  if(fresh.length)return fresh[Math.floor(Math.random()*fresh.length)];
-  const b=NAMES[Math.floor(Math.random()*NAMES.length)];let i=2;while(used.has((b+" "+i).toLowerCase()))i++;return b+" "+i;
-}
-function localAct(a,b){
-  const now=Date.now()/1000, max=S.m||5, fin=x=>{lsSave();syncLocal();render();return Object.assign({ok:true},x)};
-  if(a==="dev_add"){
-    if(L.devs.length>=max)return{ok:false,error:"Больше "+max+" устройств подключить нельзя"};
-    if(!eff().on)return{ok:false,error:"Сначала оформи подписку или возьми пробный период"};
-    const name=kitten(),link=makeLink();
-    L.devs.push({id:L.nid++,name,link,on:0});L.used=(L.used||[]).concat(name);
-    return fin({name,link});
-  }
-  if(a==="dev_links")return{ok:true,links:L.devs.map(d=>({id:d.id,name:d.name,link:d.link||makeLink()}))};
-  if(a==="dev_rename"){
-    const d=L.devs.find(x=>x.id===b.id);if(!d)return{ok:false,error:"Устройство не найдено"};
-    const name=String(b.name||"").split(/\s+/).filter(Boolean).join(" ");
-    if(!name||name.length>20)return{ok:false,error:"Имя должно быть от 1 до 20 символов. Попробуй ещё раз."};
-    if(L.devs.some(x=>x.id!==d.id&&x.name.toLowerCase()===name.toLowerCase()))return{ok:false,error:"У тебя уже есть устройство с таким именем. Придумай другое."};
-    d.name=name;L.used=(L.used||[]).concat(name);return fin();
-  }
-  if(a==="dev_del"){
-    if(!L.devs.some(x=>x.id===b.id))return{ok:false,error:"Устройство не найдено"};
-    L.devs=L.devs.filter(x=>x.id!==b.id);return fin();
-  }
-  if(a==="trial"){
-    if(L.trialUntil>now)return{ok:true,title:"Пробный период активен",left:left(L.trialUntil-now),key:makeLink()};
-    const paid=S.a===1&&S.ex>now;
-    if(L.trialUntil||S.tr===0)return paid?{ok:false,error:"У тебя уже есть активная подписка"}:{ok:true,ended:true};
-    if(paid)return{ok:false,error:"У тебя уже есть активная подписка"};
-    const days=S.tr||1;L.trialUntil=now+days*86400;
-    return fin({title:"Пробный период на "+days+" дн. активирован!",key:makeLink()});
-  }
-  return{ok:false,error:"Неизвестное действие"};
-}
-const act=(a,b)=>API?call(a,b):Promise.resolve(localAct(a,b||{}));
-syncLocal();
+/* Офлайн-режима нет: без связи с ботом ничего не имитируем */
+const L={};
+function eff(){const now=Date.now()/1000;const ex=S.a===1?S.ex:0;return{on:ex>now,ex}}
+const act=(a,b)=>call(a,b);
 
 /* ===== Сервер бота ===== */
 async function call(action,body){
@@ -300,10 +262,15 @@ async function call(action,body){
   }catch(e){linkState="fail";render();return{ok:false,error:"Нет связи с сервером, попробуй позже"}}
 }
 function applyState(s){
-  ["a","ex","d","m","b","rd","rf","rb","rp","sb","td","tl","tr","dc","de","tp","sub","mp","me","ed","mn","cr","ow","ot","bd","hp","rs","lw"].forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});
-  if(Array.isArray(s.dv))S.dv=s.dv;
-  S.tb=s.tb; S.ds=s.ds||0;
-  if(s.tf){tariffs=s.tf.split(",").map(x=>{const[k,p,d,y]=x.split(".");return{k,price:+p,days:+d,disc:+y}});drawTariffs()}
+  if(!s||typeof s!=="object")return;
+  ["a","ex","d","m","b","rd","rf","rb","rp","sb","td","tl","tr","dc","de","tp","mp","me","ed","mn","cr","ow","ot","bd","rs"]
+    .forEach(k=>{if(s[k]!==undefined&&s[k]!==null)S[k]=num(s[k],S[k])});
+  S.sub=typeof s.sub==="string"&&safeUrl(s.sub,[new URL(API).hostname])?s.sub:"";
+  S.hp=typeof s.hp==="string"&&s.hp.startsWith(API+"/happ/")?s.hp:"";
+  S.lw=typeof s.lw==="string"?s.lw.slice(0,400):"";
+  if(Array.isArray(s.dv))S.dv=s.dv.slice(0,20).map(d=>({id:String(d&&d.id||"").slice(0,32),name:String(d&&d.name||"").slice(0,60),on:1}));
+  S.tb=s.tb==null?null:num(s.tb,null); S.ds=num(s.ds,0);
+  if(s.tf){const t=parseTf(s.tf);if(t.length){tariffs=t;drawTariffs()}}
   render();
 }
 let busy=false;
@@ -407,7 +374,8 @@ async function doTrial(){
 /* ===== Оплата ===== */
 /* СБП: бот создаёт платёж в RollyPay, открываем страницу оплаты (выбор банка / QR).
    Крипта: бот создаёт счёт в CryptoBot (в рублях, курс считает CryptoBot) и сразу открываем чек */
-const openExt=u=>{haptic();try{tg&&tg.openLink?tg.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}};
+const openExt=u=>{const s=safeUrl(u);if(!s)return toast("Ссылка заблокирована");haptic();
+  try{tg&&tg.openLink?tg.openLink(s):winOpen(s)}catch(e){winOpen(s)}};
 async function payGo(method,body,btn){
   if(!API)return toast("Оплата доступна при открытии приложения из бота");
   await withBtn(btn,async()=>{
@@ -540,7 +508,7 @@ $("linksBtn").onclick=showLinks;
 $("helpBtn").onclick=()=>show("help");
 $("trial").onclick=doTrial;
 document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>show(b.dataset.open));
-document.querySelectorAll("[data-doc]").forEach(b=>b.onclick=()=>{haptic();const u=b.dataset.doc;try{tg&&tg.openLink?tg.openLink(u):window.open(u,"_blank")}catch(e){window.open(u,"_blank")}});
+document.querySelectorAll("[data-doc]").forEach(b=>b.onclick=()=>openExt(b.dataset.doc));
 
 function homeLinkKind(on){
   if(!API)return "bot";                       // приложение без связи с ботом: как раньше
@@ -575,6 +543,11 @@ try{tg&&tg.BackButton&&tg.BackButton.onClick(()=>sheet.classList.contains("on")?
 render(); drawTariffs(); setInterval(render,30000);
 /* свежие данные с сервера: при открытии и при возврате в приложение */
 const refresh=()=>{if(API&&tg&&tg.initData)call("state")};
+if(!(tg&&tg.initData)){   // открыли не из бота: ничего не показываем, кроме перехода в бота
+  linkState="fail";
+  setTimeout(()=>openSheet(`<h3>Открой через бота</h3><p>Мини-приложение работает только из Telegram-бота @${esc(BOT)}.</p>
+    <a class="btn pri" href="https://t.me/${esc(BOT)}" target="_blank" rel="noopener noreferrer">Открыть @${esc(BOT)}</a>`),300);
+}
 refresh(); document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
 setInterval(()=>{if(!document.hidden&&!busy&&!sheet.classList.contains("on"))refresh()},15000);   // изменения из бота подтягиваются сами
 </script>
